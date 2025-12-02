@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block worker %}active{% endblock %}
+{% block worker_home %}active{% endblock %}{% block content %}
+{% load static %}
+
+<div class="content-wrapper">
+    <section class="content-header">
+        <ol class="breadcrumb">
+            <li><a href="{% url 'worker:worker_ledger' %}"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">مستری کھاتہ</li>
+        </ol>
+    </section>
+    <br>
+    <section class="content">
+        <div class="box">
+            <div class="box-header">
+                <h4 class="text-center"><b>مستری کھاتہ</b></h4>
+            </div>
+            <div class="box-body">
+                {% if settlements %}
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <th>مستری</th>
+                                <th>بھٹہ</th>
+                                <th>سال</th>
+                                <th>کُل اِینٹیں</th>
+                                <th>اِینٹ کا ریٹ فی ہزار</th>
+                                <th>کُل کمائی</th>
+                                <th>  کُل خرچ</th>
+                                <th>جمع</th>
+                                <th>باقی</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for s in settlements %}
+                            <tr>
+                                <td>{{ s.worker.name }}</td>
+                                <td>{{ s.bhatta.name }}</td>
+                                <td>{{ s.year }}</td>
+                                <td>{{ s.total_bricks }}</td>
+                                <td>{{ s.brick_rate_per_1000 }}</td>
+                                <td>{{ s.total_earned }}</td>
+                                <td>{{ s.total_advance }}</td>
+                                <td>{{ s.total_loan_deducted }}</td>
+                                <td>{{ s.amount_to_pay }}</td>
+                                <td><a href="{% url 'worker:detail' s.worker.id %}" class="btn btn-xs btn-info">کھاتہ</a></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p>No settlements yet. Use the links below to manage workers.</p>
+                    <div class="text-center">
+                        <a href="{% url 'worker:add_worker' %}" class="btn btn-primary">مستری شامل کریں</a>
+                        <a href="{% url 'worker:add_bhatta' %}" class="btn btn-success">بھٹہ شامل کریں</a>
+                    </div>
+
+                    <hr>
+
+                    <h4>Workers</h4>
+                    <ul class="list-group">
+                        {% for w in workers %}
+                            <li class="list-group-item">
+                                {{ w.name }} - {{ w.phone }}
+                                <br>
+                                <small>
+                                    Bhatta(s):
+                                    {% if w.bhattas.all %}
+                                        {% for b in w.bhattas.all %}
+                                            {{ b.name }}{% if not forloop.last %}, {% endif %}
+                                        {% endfor %}
+                                    {% else %}
+                                        <em>No bhatta assigned</em>
+                                    {% endif %}
+                                </small>
+                                <div class="pull-right">
+                                    <a href="{% url 'worker:detail' w.id %}" class="btn btn-xs btn-info">کھاتہ</a>
+                                    <a href="{% url 'worker:add_advance' w.id %}" class="btn btn-xs btn-warning">خرچہ شامل کریں</a>
+                                    <a href="{% url 'worker:add_loan' w.id %}" class="btn btn-xs btn-danger">پیشگی شامل کریں</a>
+                                </div>
+                            </li>
+                        {% empty %}
+                            <li class="list-group-item">No workers</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        </div>
+    </section>
+</div>
+
+{% endblock %}

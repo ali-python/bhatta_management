@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block worker %}active{% endblock %}
+{% block worker_home %}active{% endblock %}{% block content %}
+{% load static %}
+
+<div class="content-wrapper">
+    <section class="content-header">
+        <ol class="breadcrumb">
+            <li><a href="{% url 'worker:worker_ledger' %}"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">Add Advance</li>
+        </ol>
+    </section>
+    <br>
+    <section class="content">
+        <div class="box">
+            <div class="box-header">
+                <h4 class="text-center"><b>Add Advance</b></h4>
+            </div>
+            <div class="box-body">
+                <form method="post">{% csrf_token %}
+                    <div class="row">
+                        <div class="col-md-4 form-group">
+                            <label>Worker <span style="color:red">*</span></label>
+                            <select name="worker" class="form-control" required>
+                                {% for w in workers %}
+                                    <option value="{{ w.id }}" {% if initial_worker and initial_worker.id == w.id %}selected{% endif %}>{{ w.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label>Date</label>
+                            <input type="date" name="date" class="form-control" value="{{ today|default:None }}">
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label>Amount</label>
+                            <input type="number" step="0.01" name="amount" class="form-control" required>
+                        </div>
+                        <div class="col-md-4 form-group">
+                            <label>Description</label>
+                            <input type="text" name="description" class="form-control" >
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-2 form-group">
+                            <button type="submit" class="btn btn-primary form-control">Save</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+</div>
+
+{% endblock %}

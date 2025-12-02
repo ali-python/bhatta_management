@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>{{ entity.name }} Ledger</h3>
+<p>Remaining Balance: ₹{{ balance }}</p>
+
+<h4>Trips</h4>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Tractor</th>
+            <th>Bricks Carried</th>
+            <th>Trip Amount</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for trip in trips %}
+        <tr>
+            <td>{{ trip.date }}</td>
+            <td>{{ trip.tractor.name }}</td>
+            <td>{{ trip.bricks_carried }}</td>
+            <td>₹{{ trip.trip_amount }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h4>Advances / Payments</h4>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Amount</th>
+            <th>Type</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for adv in advances %}
+        <tr><td>{{ adv.date }}</td><td>₹{{ adv.amount }}</td><td>Advance</td></tr>
+        {% endfor %}
+        {% for pay in payments %}
+        <tr><td>{{ pay.date }}</td><td>₹{{ pay.amount }}</td><td>Payment</td></tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h4>Add Payment</h4>
+<form method="post" action="{% url 'tractor:payment_create' %}">
+    {% csrf_token %}
+    <input type="hidden" name="employee" value="{{ entity.id }}">
+    <div class="form-group">
+        <label>Payment Amount (₹)</label>
+        <input type="number" step="0.01" min="0" max="{{ balance }}" name="amount" class="form-control" required>
+    </div>
+    <button type="submit" class="btn btn-success">Add Payment</button>
+</form>
+
+{% endblock %}

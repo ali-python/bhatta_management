@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% block product %}active{% endblock %}
+{% block product_list %}active{% endblock %}
+{% block content %}
+{% load static %}
+
+<div class="content-wrapper">
+    <section class="content-header">
+        <ol class="breadcrumb">
+            <li><a href="{% url 'common:index' %}"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">لیسٹ</li>
+        </ol>
+    </section>
+    <br>
+    <section class="content">
+        <div class="row">
+            <div class="col-md-12 form-group">
+                <div class="box">
+                    <div class="row">
+                        <h4 class="text-center"><b>لیسٹ</b></h4>
+                    </div>
+                    <br>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <!-- <div class="col-md-4 pull-left">
+                                <input type="text" class="form-control name_search" placeholder="Search by Name ..." >
+                            </div> -->
+                            <div class="col-md-4">
+                                <input type="text" class="form-control category_search" placeholder="نام ...">
+                            </div>
+                            <div class="col-md-2 pull-right">
+                                <button class="form-control btn btn-primary search">Search</button>
+                            </div>
+                            <br><br>
+                            <hr>
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        <div class="table-responsive">
+                            <table class="table align-items-center table-striped table-bordered table-hover">
+                                <thead class="thead-dark">
+                                <tr>
+                                    <th>نام</th>
+                                    <!-- <th>Notify Quantity</th> -->
+                                    <th>کُل تعداد</th>
+                                    <th>دستیاب تعداد</th>
+                                    <th>تاریخ</th>
+                                    <th class="text-center">Action</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for product in object_list %}
+                                <tr>
+                                    <td>{{product.name|title}} -- {{product.category|title}}</td>
+                                    <!-- <td>{{product.notify_qty|floatformat:-2}}</td> -->
+                                    <td>{{product.total_items|floatformat:-2}}</td>
+                                    <td>{{product.product_available_items|floatformat:-2}}</td>
+                                    <td>{{product.date}}</td>
+                                    <td class="text-center">
+                                        <!-- <a href="{% url 'product:update' pk=product.id %}"><button class="btn btn-primary btn-xs">اپڈیٹ</button></a> -->
+                                        <a href="{% url 'product:stockin_detail' pk=product.id %}"><button class="btn btn-success btn-xs">اسٹوک ان</button></a>
+                                        <a href="{% url 'product:stockout_detail' pk=product.id %}"><button class="btn btn-danger btn-xs">اسٹوک اوٹ</button></a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+
+                                </tbody>
+                            </table>
+                            {% if paginator.page_range|length > 1 %}
+                            <div class="text-center col-lg-12">
+                                <ul class="pagination justify-content-center">
+                                    <li><a  style="background-color: #3070A8; color: white" class="page_previous" href="{% if page_obj.has_previous %}{% url 'product:list' %}?page={{ page_obj.previous_page_number }}{% else %}#{% endif %}" title="Previous"><<</a></li>
+                                    <li><a style="background-color: #3070A8; color: white" class="page_next" href="{% if page_obj.has_next %}{% url 'product:list' %}?page={{ page_obj.next_page_number }}{% else %}#{% endif %}" title="Next">>></a></li>
+                                </ul>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block script %}
+    {{ block.super }}
+<script>
+$(function () {
+    $('.search').on('click', function () {
+        var url = '{% url "product:list" %}';
+        window.location.href  = url + '?' + 'product_name=' + $('.name_search').val() + '&product_category=' +  $('.category_search').val();
+    });
+})
+</script>
+{% endblock %}

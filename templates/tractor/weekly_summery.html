@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% block tractor %}active{% endblock %}
+{% block tractor_weekly_summary %}active{% endblock %}
+
+{% block content %}
+{% load static %}
+
+<div class="content-wrapper">
+
+    <section class="content-header">
+        <ol class="breadcrumb">
+            <li><a href="{% url 'common:index' %}"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">ہفتہ وار خلاصہ</li>
+        </ol>
+    </section>
+    <br>
+
+    <section class="content">
+
+        <!-- FILTER FORM -->
+        <form method="get" class="mb-3">
+            <div class="row">
+
+                <div class="col-md-4">
+                    <label><b>ہفتہ منتخب کریں</b></label>
+                    <select name="week" class="form-control">
+                        {% for item in weeks %}
+                            <option value="{{ item.week }}" {% if item.week == selected_week %}selected{% endif %}>
+                                Week {{ item.week }} ({{ item.start }} → {{ item.end }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label><b>سال منتخب کریں</b></label>
+                    <select name="year" class="form-control">
+                        {% for y in years %}
+                            <option value="{{ y }}" {% if y == selected_year %}selected{% endif %}>
+                                {{ y }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                    <br>
+                <div class="col-md-3 d-flex align-items-end">
+                    <button class="btn btn-primary w-100">Filter</button>
+                </div>
+            </div>
+        </form>
+
+
+        <!-- PAGINATED EMPLOYEE SUMMARY -->
+        {% for data in page_obj %}
+        <div class="card mb-4 border-primary shadow-sm p-3">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">{{ data.employee.name }} ({{ data.employee.get_role_display }})</h5>
+            </div>
+
+            <div class="card-body">
+
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <p><strong>ٹوٹل چکر رقم:</strong> ₹{{ data.total_trip_amount|floatformat:2 }}</p>
+                    </div>
+                    <div class="col-md-3">
+                        <p><strong>ٹوٹل ایڈوانس:</strong> ₹{{ data.total_advance|floatformat:2 }}</p>
+                    </div>
+                    <div class="col-md-3">
+                        <p><strong>ٹوٹل ادائیگی:</strong> ₹{{ data.total_paid|floatformat:2 }}</p>
+                    </div>
+                    <div class="col-md-3">
+                        <p><strong>بیلنس:</strong> ₹{{ data.balance|floatformat:2 }}</p>
+                    </div>
+                </div>
+
+                <h6>اِس ہفتے کے ٹرپ</h6>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered table-striped">
+                        <thead class="thead-light">
+                            <tr>
+                                <th>تاریخ</th>
+                                <th>ٹریکٹر</th>
+                                <th>اینٹیں اٹھائی گئیں</th>
+                                <th>حصہ (₹)</th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            {% for trip in data.trips %}
+                            <tr>
+                                <td>{{ trip.date }}</td>
+                                <td>{{ trip.tractor.name }}</td>
+                                <td>{{ trip.bricks_carried }}</td>
+                                <td>
+                                    {% if trip.driver == data.employee %}
+                                        ₹{{ trip.driver_share|floatformat:2 }}
+                                    {% else %}
+                                        ₹{{ trip.conductor_share|floatformat:2 }}
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center">No trips this week.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+
+                    </table>
+                </div>
+
+            </div>
+        </div>
+        {% empty %}
+            <p class="text-center text-muted">No data found for this week.</p>
+        {% endfor %}
+
+        <!-- PAGINATION CONTROLS -->
+        <div class="pagination justify-content-center">
+            <ul class="pagination">
+
+                {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" 
+                       href="?week={{ selected_week }}&year={{ selected_year }}&page={{ page_obj.previous_page_number }}">
+                        Previous
+                    </a>
+                </li>
+                {% endif %}
+
+                <li class="page-item disabled">
+                    <span class="page-link">
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    </span>
+                </li>
+
+                {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" 
+                       href="?week={{ selected_week }}&year={{ selected_year }}&page={{ page_obj.next_page_number }}">
+                        Next
+                    </a>
+                </li>
+                {% endif %}
+
+            </ul>
+        </div>
+
+    </section>
+</div>
+
+{% endblock %}

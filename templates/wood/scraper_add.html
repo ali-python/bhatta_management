@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block wood %}active{% endblock %}
+{% block wood_dashboard %}active{% endblock %}{% block content %}
+
+
+<div class="content-wrapper">
+
+    <!-- Breadcrumb -->
+    <section class="content-header">
+        <ol class="breadcrumb">
+            <li>
+                <a href="{% url 'wood_scrapper:wood_dashboard' %}">
+                    <i class="fa fa-dashboard"></i> لکڑی بورو
+                </a>
+            </li>
+            <li class="active">نیا لکڑی بورو شامل کریں</li>
+        </ol>
+    </section>
+<br><br>
+    <section class="content">
+
+        <div class="box">
+            <div class="box-header">
+                <h3 class="text-center"><b>نیا لکڑی بورو شامل کریں</b></h3>
+            </div>
+
+            <div class="box-body">
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="form-group">
+                        <label><b>نام</b></label>
+                        <input type="text" name="name" class="form-control" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label><b>فون نمبر</b></label>
+                        <input type="text" name="phone" class="form-control">
+                    </div>
+
+                    <div class="form-group">
+                        <label><b>پتہ</b></label>
+                        <textarea name="address" class="form-control" rows="3"></textarea>
+                    </div>
+
+                    <button class="btn btn-primary">Save</button>
+                </form>
+
+            </div>
+        </div>
+
+    </section>
+
+</div>
+
+{% endblock %}

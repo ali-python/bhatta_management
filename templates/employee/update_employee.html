@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block employee %}active{% endblock %}
+{% block employee_create %}active{% endblock %}
+{% block content %}
+{% load static %}
+
+<div class="content-wrapper">
+    <section class="content-header">
+        <ol class="breadcrumb">
+            <li><a href="{% url 'common:index' %}"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">مزدور اپڈیٹ</li>
+        </ol>
+    </section>
+    <br>
+    <section class="content">
+        <!-- Info boxes -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h4 class="text-center"><b>مزدور اپڈیٹ</b></h4>
+                    </div>
+                    <div class="box-body">
+                        <form action="{% url 'employee:update' pk=object.id %}" method="post" autocomplete="off">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-md-4 pull-left form-group">
+                                    <label class="form-control-label">نام <span style="color:red">*</span></label>
+                                    <input type="text" name="name" class="form-control form-control-alternative" value="{{object.name}}" required>
+                                </div>
+                                <div class="col-md-4 pull-left form-group">
+                                    <label class="form-control-label">فون نمبر  <span style="color:red">*</span></label>
+                                    <input type="text" name="phone" class="form-control form-control-alternative" value="{{object.phone}}" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 pull-left form-group">
+                                    <label class="form-control-label">مکمل پتہ<span style="color:red">*</span></label>
+                                    <input type="text" name="address" class="form-control form-control-alternative" value="{{object.address}}">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-2 pull-left form-group">
+                                    <label class="form-control-label"></label>
+                                    <button type="submit" value="Update" class="btn btn-primary form-control">Save</button>
+                                </div>
+                            </div>
+                            </div>
+                            
+                                
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+{% endblock %}

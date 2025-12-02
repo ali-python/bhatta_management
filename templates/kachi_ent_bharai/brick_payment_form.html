@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block kachi_ent_bharai %}active{% endblock %}                 
+{% block kachi_ent_dashboard %}active{% endblock %}
+{% block content %}
+
+<div class="content-wrapper p-4" style="padding-left: 25px;">
+
+    <h3>ادائیگی {{ employee.name }}</h3>
+    <div class="card p-4 shadow-sm border-success">
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label class="form-label">ادائیگی رقم (₹)</label>
+                {{ form.amount }}
+            </div>
+                <br>
+            <button class="btn btn-success">Save</button>
+
+            <a href="{% url 'kachi_ent_bharai:employee_detail' employee.id %}"
+               class="btn btn-secondary float-right">
+               Cancel
+            </a>
+
+        </form>
+    </div>
+
+</div>
+
+{% endblock %}

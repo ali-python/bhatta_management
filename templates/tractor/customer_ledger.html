@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+{% block tractor %}active{% endblock %}
+{% block content %}
+
+<div class="content-wrapper p-4" style="padding-left: 15px;">
+
+<!-- Header -->
+
+<div class="mb-4">
+    <br>
+    <a href="{% url 'tractor:create_customer_ledger' customer.id %}" class="btn btn-primary mb-3">
+        + کھاتہ کا اِندراج بنائیں
+    </a>
+    <a href="{% url 'tractor:create_customer_advance' customer.id %}" class="btn btn-primary mb-3">
+        + ایڈوانس اِندراج بنائیں
+    </a>
+    <h3 class="mb-1">{{ customer.name }} — کھاتہ</h3>
+    <p class="text-muted">فون نمبر: {{ customer.phone }} | پتہ: {{ customer.address }}</p>
+
+```
+<div class="alert alert-info shadow-sm" style="font-size: 20px;">
+    <strong>بقایا رقم:</strong> ₹{{ balance|floatformat:0 }}
+</div>
+```
+
+</div>
+
+<!-- Trips Card -->
+
+<div class="card shadow-sm mb-4 border-primary">
+    <div class="card-header bg-primary text-white">
+        <h3 class="mb-0">  چکر رِیکارڈ</h3>
+    </div>
+    <div class="card-body p-0 table-responsive">
+        <table class="table table-striped table-hover text-center mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>تاریخ</th>
+                    <th>ڈرائیور</th>
+                    <th>لے جائی گئی اِینٹیں</th>
+                    <th>اینٹ قِسم</th>
+                    <th>اینٹ . ریٹ</th>
+                    <th>رقم</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for trip in trips %}
+                <tr>
+                    <td>{{ trip.date }}</td>
+                    <td>{{ trip.driver.name }}</td>
+                    <td>{{ trip.bricks_carried }}</td>
+                    <td>{{ trip.brick_type }}</td>
+                    <td>₹{{ trip.brick_rate|floatformat:2 }}</td>
+                    <td>₹{{ trip.customer_amount|floatformat:0 }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-muted">No trips found for this customer.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Advance Payments Card -->
+
+<div class="card shadow-sm mb-4 border-info">
+    <div class="card-header bg-info text-white">
+        <h3 class="mb-0">ایڈوانس ادائیگیاں</h3>
+    </div>
+    <div class="card-body p-0 table-responsive">
+        <table class="table table-striped table-hover text-center mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>تاریخ</th>
+                    <th>رقم</th>
+                    <th>استعمال شدہ رقم</th>
+                    <th>بقیہ رقم</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for advance in advances %}
+                <tr>
+                    <td>{{ advance.date }}</td>
+                    <td>₹{{ advance.amount|floatformat:0 }}</td>
+                    <td>₹{{ advance.used_amount|floatformat:0 }}</td>
+                    <td>₹{{ advance.remaining_amount|floatformat:0 }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-muted">No advance payments found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Payments Card -->
+
+<div class="card shadow-sm mb-4 border-success">
+    <div class="card-header bg-success text-white">
+        <h3 class="mb-0">ادائیگیاں</h3>
+    </div>
+    <div style="color: blue;"><h3>Total Paid: ₹{{ total_paid|floatformat:0 }}</h3></div>
+    <div class="card-body p-0 table-responsive">
+        <table class="table table-striped table-hover text-center mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>تاریخ</th>
+                    <th>رقم</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for pay in payments %}
+                <tr>
+                    <td>{{ pay.date }}</td>
+                    <td>₹{{ pay.amount|floatformat:0 }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="2" class="text-muted">No payments recorded yet.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Ledger History -->
+
+<div class="card shadow-sm mb-4 border-warning">
+    <div class="card-header bg-warning text-white">
+        <h3 class="mb-0">کھاتہ کی تاریخ</h3>
+    </div>
+    <div class="card-body p-0 table-responsive">
+        <table class="table table-striped table-hover text-center mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>تاریخ</th>
+                    <th>ٹرپ</th>
+                    <th>تفصیل</th>
+                    <th>بقیہ رقم</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ledger in ledger_items %}
+                <tr class="{% if ledger.paid %}table-success{% else %}table-danger{% endif %}">
+                    <td>{{ ledger.date|default:"—" }}</td>
+                    <td>{{ ledger.trip.tractor.name|default:"—" }}</td>
+                    <td>{{ ledger.detail|default:"—" }}</td>
+                    <td>{% if ledger.paid %}₹0{% else %}₹{{ ledger.amount_due|floatformat:0 }}{% endif %}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-muted">No ledger entries found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add Payment Form -->
+
+<div class="card shadow-sm border-success mb-4">
+    <div class="card-header bg-success text-white">
+        <h3 class="mb-0">نئی ادائیگی شامل کریں</h3>
+    </div>
+    <div class="card-body">
+        <form method="post" class="text-center">
+            {% csrf_token %}
+            <input type="hidden" name="payment_amount" value="1">
+            <div class="row justify-content-center mb-2">
+                <div class="col-md-4">
+                    <label class="form-label">ادائیگی کی رقم</label>
+                    <input type="number" step="0.01" name="amount" class="form-control" placeholder="ادائیگی کی رقم درج کریں" required>
+                </div>
+            </div>
+            <br>
+            <div class="row">
+                <div class="col-md-4">
+                    <button type="submit" class="btn btn-success w-100 text-white">
+                        ادائیگی شامل کریں
+                    </button>
+                </div>
+            </div>
+            <br>
+        </form>
+    </div>
+</div>
+
+</div>
+
+{% endblock %}

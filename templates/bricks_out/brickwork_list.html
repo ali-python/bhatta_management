@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% block brickout %}active{% endblock %}
+{% block brickout_list_out %}active{% endblock %}
+{% block content %}
+{% load static %}
+
+<div class="content-wrapper">
+    <section class="content-header">
+        <ol class="breadcrumb">
+            <li><a href="{% url 'common:index' %}"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">اینٹ نکاسی ریکارڈ</li>
+        </ol>
+    </section>
+    <br>
+    <section class="content">
+        <div class="box">
+            <div class="box-header">
+                <h4 class="text-center"><b>اینٹ نکاسی ریکارڈ</b></h4>
+                <a href="{% url 'bricks_out:brickwork_create' %}" class="btn btn-primary pull-right">+ Add Record</a>
+            </div>
+            <div class="box-body">
+                <form method="get" class="form-inline" style="margin-bottom: 15px;">
+                    <input type="text" name="search" value="{{ search }}" class="form-control" placeholder="Search employee...">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </form>
+
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>مزدور</th>
+                            <th>تاریخ</th>
+                            <th>اِینٹوں کی تعداد</th>
+                            <th>اِینٹ کی قِسم</th>
+                            <th>ریٹ</th>
+                            <th>رقم</th>
+                            <th>عمل</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in object_list %}
+                        <tr>
+                            <td>{{ record.employee.name }}</td>
+                            <td>{{ record.date }}</td>
+                            <td>{{ record.quantity|floatformat:0 }}</td>
+                            <td>{{ record.brick_type }}</td>
+                            <td>₹{{ record.rate.rate_per_1000 }} / 1000</td>
+                            <td>₹{{ record.calculate_amount|floatformat:0 }}</td>
+                            <td>
+                                <a href="{% url 'bricks_out:brickwork_update' record.id %}" class="btn btn-xs btn-info">اپڈیٹ</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="6" class="text-center">No records found</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div class="pagination-container text-center">
+    <ul class="pagination">
+        {% if page_obj.has_previous %}
+            <li><a href="?page={{ page_obj.previous_page_number }}&search={{ search }}">Previous</a></li>
+        {% else %}
+            <li class="disabled"><span>Previous</span></li>
+        {% endif %}
+
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+                <li class="active"><span>{{ num }}</span></li>
+            {% else %}
+                <li><a href="?page={{ num }}&search={{ search }}">{{ num }}</a></li>
+            {% endif %}
+        {% endfor %}
+
+        {% if page_obj.has_next %}
+            <li><a href="?page={{ page_obj.next_page_number }}&search={{ search }}">Next</a></li>
+        {% else %}
+            <li class="disabled"><span>Next</span></li>
+        {% endif %}
+    </ul>
+</div>
+
+            </div>
+        </div>
+    </section>
+</div>
+
+{% endblock %}

@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% block tractor %}active{% endblock %}
+{% block tractor_trip_create %}active{% endblock %}
+
+{% block content %}
+{% load widget_tweaks %}
+
+<div class="content-wrapper p-4" style="padding-left: 10px;">
+    <h3 class="text-center mb-4">{% if object %}اپڈیٹ{% else %}شامل کریں{% endif %} ٹریکٹر چکر</h3>
+
+    <div class="card shadow p-4">
+        <form method="post" autocomplete="off">
+            {% csrf_token %}
+
+            <!-- CUSTOMER SELECTION OR INLINE ADD -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="id_customer"><b>گاہک</b></label>
+                   {{ form.customer|add_class:"form-control" }}
+
+                </div>
+                <div class="col-md-6">
+                    <label><b>یا نیا گاہک شامل کریں</b></label>
+                    <input type="text" name="new_customer_name" class="form-control mb-1" placeholder="نام">
+                    <input type="text" name="new_customer_phone" class="form-control mb-1" placeholder="فون">
+                    <input type="text" name="new_customer_address" class="form-control mb-1" placeholder="پتہ">
+                </div>
+            </div>
+
+            <!-- BRICK TYPE / RATE / QUANTITY -->
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label for="id_brick_type"><b>اینٹوں کی قسم</b></label>
+                    {{ form.brick_type|add_class:"form-control" }}
+                </div>
+                <div class="col-md-4">
+                    <label for="id_brick_rate"><b>اینٹوں کی قیمت (₹)</b></label>
+                    {{ form.brick_rate|add_class:"form-control" }}
+                </div>
+                <div class="col-md-4">
+                    <label for="id_bricks_carried"><b>اٹھائی گئی اینٹیں</b></label>
+                    {{ form.bricks_carried|add_class:"form-control" }}
+                </div>
+            </div>
+
+            <!-- TRACTOR + EMPLOYEES -->
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label for="id_tractor"><b>ٹریکٹر</b></label>
+                    {{ form.tractor|add_class:"form-control" }}
+                </div>
+                <div class="col-md-4">
+                    <label for="id_driver"><b>ڈرائیور</b></label>
+                    {{ form.driver|add_class:"form-control" }}
+                </div>
+                <div class="col-md-4">
+                    <label for="id_conductor"><b>کنڈکٹر</b></label>
+                    {{ form.conductor|add_class:"form-control" }}
+                </div>
+            </div>
+
+            <!-- DATE + TRIP AMOUNT -->
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <label for="id_date"><b>تاریخ</b></label>
+                    {{ form.date|add_class:"form-control" }}
+                </div>
+                <div class="col-md-4">
+                    <label for="id_trip_amount"><b>ٹرپ کی رقم (₹)</b></label>
+                    {{ form.trip_amount|add_class:"form-control" }}
+                </div>
+                <div class="col-md-4">
+                    <label><b>کل گاہک کی رقم (₹)</b></label>
+                    <input type="text" id="customer_amount" class="form-control" readonly>
+                </div>
+            </div>
+
+            <!-- EMPLOYEE SPLIT -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label><b>ڈرائیور کا حصہ (₹)</b></label>
+                    <input type="text" id="driver_share" class="form-control" readonly>
+                </div>
+                <div class="col-md-6">
+                    <label><b>کنڈکٹر کا حصہ (₹)</b></label>
+                    <input type="text" id="conductor_share" class="form-control" readonly>
+                </div>
+            </div>
+                <br>
+            <!-- SUBMIT -->
+            <button type="submit" class="btn btn-primary mt-3">Save Trip</button>
+        </form>
+    </div>
+</div>
+
+<script>
+function calculateAmounts() {
+    let bricks = parseFloat(document.getElementById("id_bricks_carried").value) || 0;
+    let rate = parseFloat(document.getElementById("id_brick_rate").value) || 0;
+    let tripAmount = parseFloat(document.getElementById("id_trip_amount").value) || 0;
+
+    document.getElementById("customer_amount").value = (bricks * rate).toFixed(2);
+
+    let conductorSelected = document.getElementById("id_conductor").value;
+    if (conductorSelected) {
+        document.getElementById("driver_share").value = (tripAmount / 2).toFixed(2);
+        document.getElementById("conductor_share").value = (tripAmount / 2).toFixed(2);
+    } else {
+        document.getElementById("driver_share").value = tripAmount.toFixed(2);
+        document.getElementById("conductor_share").value = '0.00';
+    }
+}
+
+// Listen to inputs
+["id_bricks_carried", "id_brick_rate", "id_trip_amount", "id_conductor"].forEach(id => {
+    document.getElementById(id).addEventListener("input", calculateAmounts);
+});
+window.addEventListener('load', calculateAmounts);
+</script>
+
+{% endblock %}

@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="content-wrapper" style="padding-left:15px">
+
+    <section class="content-header d-flex justify-content-between align-items-center mb-3">
+        <h3>{{ employee.name }} — ہفتہ وار تفصیلات</h3>
+        <a href="{% url 'raw_bricks_employee:dashboard' %}" class="btn btn-secondary">← Back</a>
+    </section>
+
+    <div class="mb-3">
+        <a href="?week={{ prev_week }}" class="btn btn-outline-primary">← Previous Week</a>
+        <a href="?week={{ next_week }}" class="btn btn-outline-primary">Next Week →</a>
+    </div>
+
+    <div class="mb-3">
+        <a href="{% url 'hourly:give_payment' employee.id %}" class="btn btn-success">ادائیگی مزدور</a>
+        <a href="{% url 'hourly:add_advance' %}" class="btn btn-warning">خرچہ شامل کریں</a>
+        <a href="{% url 'hourly:add_saving' %}" class="btn btn-info">جمع</a>
+    </div>
+
+    <!-- Hours Worked -->
+    <div class="card mb-3 shadow-sm border-primary">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">کام کے گھنٹے</h4>
+        </div>
+        <div class="card-body p-2">
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped text-center mb-0">
+                    <thead>
+                        <tr>
+                            <th>تاریخ</th>
+                            <th>گھنٹے</th>
+                            <th>رقم (₹)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for day in days %}
+                        <tr>
+                            <td>{{ day.date|date:"D, d M" }}</td>
+                            <td>{{ day.hours }}h {{ day.minutes }}m</td>
+                            <td>₹{{ day.amount|floatformat:0 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="text-end mt-2">
+                <h5>کُل کمائی: <b>₹{{ weekly_total|floatformat:0 }}</b></h5>
+            </div>
+        </div>
+    </div>
+
+    <!-- Advances & Savings -->
+    <div class="card mb-3 shadow-sm border-warning">
+        <div class="card-header bg-warning text-dark">
+            <h4 class="mb-0">خرچہ اور جمع</h4>
+        </div>
+        <div class="card-body p-2 d-flex justify-content-around text-center">
+            <div>
+                <p class="mb-1">خرچہ:</p>
+                <h5>₹{{ total_advance|floatformat:0 }}</h5>
+            </div>
+            <div>
+                <p class="mb-1">جمع:</p>
+                <h5>₹{{ total_saving|floatformat:0 }}</h5>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payments -->
+    <div class="card mb-3 shadow-sm border-success">
+        <div class="card-header bg-success text-white">
+            <h4 class="mb-0">ادائیگی</h4>
+        </div>
+        <div class="card-body p-2">
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped text-center mb-0">
+                    <thead>
+                        <tr>
+                            <th>تاریخ</th>
+                            <th>رقم (₹)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in payments %}
+                        <tr>
+                            <td>{{ p.date|date:"d M Y" }}</td>
+                            <td>₹{{ p.amount|floatformat:0 }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="2" class="text-muted">No payments yet</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="d-flex justify-content-between mt-2">
+                <h5>کُل ادا شدہ: <b>₹{{ total_paid|floatformat:0 }}</b></h5>
+                <h5>بقیہ: <b class="text-success">₹{{ remaining|floatformat:0 }}</b></h5>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loans -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-danger text-white">
+            <h5 class="mb-0">پیشگی</h5>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-bordered mb-0 text-center">
+                <thead>
+                    <tr>
+                        <th>تاریخ</th>
+                        <th>رقم (₹)</th>
+                        <th>نوٹ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for l in loans %}
+                    <tr>
+                        <td>{{ l.date|date:"d M, Y" }}</td>
+                        <td>₹{{ l.amount|floatformat:0 }}</td>
+                        <td>{{ l.note }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-muted">No loans taken.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

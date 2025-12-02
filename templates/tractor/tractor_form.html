@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block tractor %}active{% endblock %}
+{% block tractor_create %}active{% endblock %}
+{% block content %}
+<div class="content-wrapper">
+    <section class="content-header">
+        <ol class="breadcrumb">
+            <li><a href="{% url 'common:index' %}"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">{% if object %}اپڈیٹ{% else %}شامل کریں{% endif %} ٹریکٹر</li>
+        </ol>
+    </section>
+    <br>
+    <section class="content">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box">
+                    <div class="box-header text-center">
+                        <h4><b>{% if object %}اپڈیٹ{% else %}شامل کریں{% endif %} ٹریکٹر</b></h4>
+                    </div>
+                    <div class="box-body">
+                        <form method="post" autocomplete="off">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-md-4 form-group">
+                                    <label>نام <span class="text-danger">*</span></label>
+                                    {{ form.name }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-2 form-group">
+                                    <button type="submit" class="btn btn-primary form-control">Save</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="content-wrapper p-4" style="padding-left: 15px;">
+
+    <h3> کھاتہ کا اندراج بنائیں — {{ customer.name }}</h3>
+    <hr>
+
+    <form method="post">
+        {% csrf_token %}
+        
+        <div class="mb-3">
+            <label class="form-label">{{ form.amount_due.label }}</label>
+            {{ form.amount_due }}
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">{{ form.detail.label }}</label>
+            {{ form.detail }}
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">{{ form.date.label }}</label>
+            {{ form.date }}
+        </div>
+
+        <br>
+        <button class="btn btn-primary w-100">اندراج محفوظ کریں</button>
+    </form>
+
+</div>
+
+{% endblock %}

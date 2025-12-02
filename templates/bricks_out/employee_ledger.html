@@ -1,0 +1,381 @@
+{% extends 'base.html' %}
+{% block brickout %}active{% endblock %}
+{% block employee_list %}active{% endblock %}
+{% block content %}
+{% load static %}
+
+<style>
+    .summary-card {
+        padding: 15px;
+        border-radius: 8px;
+        background: #f2f6ff;
+        border-left: 5px solid #3c8dbc;
+        margin-bottom: 20px;
+    }
+    .week-box {
+        border: 1px solid #dcdcdc;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+        background: #fcfcfc;
+    }
+    .week-title {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        color: #3f51b5;
+    }
+</style>
+
+<div class="content-wrapper">
+
+```
+
+<section class="content-header">
+    <ol class="breadcrumb">
+        <li><a href="{% url 'common:index' %}"><i class="fa fa-dashboard"></i> Home</a></li>
+        <li><a href="{% url 'employee:list' %}">مزدور</a></li>
+        <li class="active">{{ employee.name }}'s کھاتہ</li>
+    </ol>
+</section>
+<br><br>
+<section class="content">
+
+    <div class="box">
+
+        <div class="box-header text-center">
+            <h2><b>{{ employee.name }}</b></h2>
+            <p>📞 {{ employee.phone }} &nbsp; | &nbsp; 🏠 {{ employee.address }}</p>
+        </div>
+
+        <div class="text-center" style="margin-top:10px;">
+            <a href="{% url 'payment:payment_add' %}?employee={{ employee.id }}" class="btn btn-success">
+                + Make Payment
+            </a>
+            <a href="{% url 'bricks_out:add_saving' %}?employee={{ employee.id }}" class="btn btn-success">
+                + Saving
+            </a>
+            
+        </div>
+
+        <div class="box-body">
+
+            <!-- Summary -->
+            <div class="summary-card">
+                <h4><b>خلاصہ</b></h4>
+                <table class="table table-bordered">
+                    <tr>
+                        <th>کُل اینٹیں</th>
+                        <th>کمائی (₹)</th>
+                        <!-- <th>Total Advance Employee Taken (₹)</th> -->
+                        <th>کُل کٹوتی (₹)</th>
+                        <th>کُل خرچہ (₹)</th>
+                        <th>پیشگی</th>
+                        <th>جمع</th>
+                        <th>ادا کی گئی رقوم (₹)</th>
+                        <th>بقیہ رقوم (₹)</th>
+                    </tr>
+                    <tr>
+                        {% if week_data.has_other_pages or week_data.number > 1 %}
+                            <!-- NOT first week → only loan + saving -->
+                            <td>0</td>
+                            <td><b>₹0</b></td>
+                            <td style="color:orange;">₹0</td>
+                            <td style="color:purple;">₹0</td>
+                            <td style="color:rgb(128, 19, 0);">₹{{ total_loan|floatformat:0 }}</td>
+                            <td style="color:rgb(47, 148, 0);">₹{{ total_saving|floatformat:0 }}</td>
+                            <td style="color:blue;">₹0</td>
+                            <td><b style="color:green;">₹0</b></td>
+
+                        {% else %}
+                            <!-- FIRST WEEK → show full summary -->
+                            <td>{{ total_bricks }}</td>
+                            <td><b>₹{{ total_amount|floatformat:2 }}</b></td>
+                            <td style="color:orange;">₹{{ total_deducted|floatformat:0 }}</td>
+                            <td style="color:purple;">₹{{ remaining_advance|floatformat:0 }}</td>
+                            <td style="color:rgb(128, 19, 0);">₹{{ total_loan|floatformat:0 }}</td>
+                            <td style="color:rgb(47, 148, 0);">₹{{ total_saving|floatformat:0 }}</td>
+                            <td style="color:blue;">₹{{ total_paid|floatformat:0 }}</td>
+                            <td><b style="color:green;">₹{{ balance|floatformat:0 }}</b></td>
+                        {% endif %}
+                    </tr>
+
+                </table>
+            </div>
+
+            <hr>
+
+            <!-- WEEK-WISE -->
+            <h3><b>اِینٹ کا کام (ہفتہ وار)</b></h3>
+            {% for week in week_data %}
+            <div class="week-box">
+                <div class="week-title">
+                    Week {{ week.week_number }}  
+                    <small>({{ week.start_date }} → {{ week.end_date }})</small>
+                </div>
+                <h4 style="color:green;"><b>کُل اینٹیں:</b> {{ week.week_bricks }}</h4>
+
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>تاریخ</th>
+                            <th>تعداد</th>
+                            <th>اِینٹ کی قِسم</th>
+                            <th>ریٹ</th>
+                            <th>رقم</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for w in week.records %}
+                        <tr>
+                            <td>{{ w.date }}</td>
+                            <td>{{ w.quantity }}</td>
+                            <td>{{ w.brick_type }}</td>
+                            <td>₹{{ w.rate.rate_per_1000 }}</td>
+                            <td>₹{{ w.calculate_amount|floatformat:2 }}</td>
+                        </tr>
+                        {% endfor %}
+                        <tr style="background:#eef2ff;">
+                            <td colspan="3"><b>Weekly Total</b></td>
+                            <td><b>₹{{ week.week_total|floatformat:0 }}</b></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            {% empty %}
+            <p class="text-center">No brick work found.</p>
+            {% endfor %}
+
+            {% if week_data.paginator.num_pages > 1 %}
+            <div class="text-center">
+                <ul class="pagination">
+                    {% if week_data.has_previous %}
+                        <li><a href="?weeks_page={{ week_data.previous_page_number }}">Previous</a></li>
+                    {% endif %}
+                    {% for i in week_data.paginator.page_range %}
+                        <li class="{% if week_data.number == i %}active{% endif %}">
+                            <a href="?weeks_page={{ i }}">{{ i }}</a>
+                        </li>
+                    {% endfor %}
+                    {% if week_data.has_next %}
+                        <li><a href="?weeks_page={{ week_data.next_page_number }}">Next</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <hr>
+
+            <!-- ADVANCES -->
+            <h3><b>خرچہ</b></h3>
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr><th>تاریخ</th><th>رقم (₹)</th></tr>
+                </thead>
+                <tbody>
+                    {% for adv in advances %}
+                    <tr>
+                        <td>{{ adv.date }}</td>
+                        <td>₹{{ adv.amount|floatformat:0 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="2" class="text-center">No advances found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {% if advances.paginator.num_pages > 1 %}
+            <div class="text-center">
+                <ul class="pagination">
+                    {% if advances.has_previous %}
+                        <li><a href="?adv_page={{ advances.previous_page_number }}">Previous</a></li>
+                    {% endif %}
+                    {% for i in advances.paginator.page_range %}
+                        <li class="{% if advances.number == i %}active{% endif %}">
+                            <a href="?adv_page={{ i }}">{{ i }}</a>
+                        </li>
+                    {% endfor %}
+                    {% if advances.has_next %}
+                        <li><a href="?adv_page={{ advances.next_page_number }}">Next</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <hr>
+
+            <!-- ADVANCE DEDUCTIONS -->
+            <h3><b>کٹوتی</b></h3>
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr><th>تاریخ</th><th>ادائیگی</th><th>کٹوتی کی رقم (₹)</th></tr>
+                </thead>
+                <tbody>
+                    {% for ded in deductions %}
+                    <tr>
+                        <td>{{ ded.date }}</td>
+                        <td>₹{{ ded.payment.amount|floatformat:0 }}</td>
+                        <td style="color:orange;">₹{{ ded.amount|floatformat:0 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="3" class="text-center">No deductions found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            {% if deductions.paginator.num_pages > 1 %}
+            <div class="text-center">
+                <ul class="pagination">
+                    {% if deductions.has_previous %}
+                        <li><a href="?ded_page={{ deductions.previous_page_number }}">Previous</a></li>
+                    {% endif %}
+                    {% for i in deductions.paginator.page_range %}
+                        <li class="{% if deductions.number == i %}active{% endif %}">
+                            <a href="?ded_page={{ i }}">{{ i }}</a>
+                        </li>
+                    {% endfor %}
+                    {% if deductions.has_next %}
+                        <li><a href="?ded_page={{ deductions.next_page_number }}">Next</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <hr>
+
+            <!-- LOANS -->
+            <h3><b>پیشگی</b></h3>
+            <h3 style="color:Green"><b>{{total_loan|floatformat:0}}<b></h3>
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>تاریخ</th>
+                        <th>رقم (₹)</th>
+                        <th>نوٹ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for loan in loans %}
+                    <tr>
+                        <td>{{ loan.date }}</td>
+                        <td style="color:red;">₹{{ loan.amount|floatformat:0 }}</td>
+                        <td>{{ loan.note|default:"—" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-center">No loan records found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {% if loans.paginator.num_pages > 1 %}
+            <div class="text-center">
+                <ul class="pagination">
+                    {% if loans.has_previous %}
+                        <li><a href="?loan_page={{ loans.previous_page_number }}">Previous</a></li>
+                    {% endif %}
+                    {% for i in loans.paginator.page_range %}
+                        <li class="{% if loans.number == i %}active{% endif %}">
+                            <a href="?loan_page={{ i }}">{{ i }}</a>
+                        </li>
+                    {% endfor %}
+                    {% if loans.has_next %}
+                        <li><a href="?loan_page={{ loans.next_page_number }}">Next</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+            {% endif %}
+
+
+            <hr>
+
+            <!-- SAVINGS -->
+            <h3><b>جمع</b></h3>
+            <h3 style="color:Green"><b>{{total_saving|floatformat:0}}<b></h3>
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>تاریخ</th>
+                        <th>رقم (₹)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for save in savings %}
+                    <tr>
+                        <td>{{ save.date }}</td>
+                        <td style="color:green;">₹{{ save.amount|floatformat:0 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="2" class="text-center">No savings found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {% if savings.paginator.num_pages > 1 %}
+            <div class="text-center">
+                <ul class="pagination">
+                    {% if savings.has_previous %}
+                        <li><a href="?saving_page={{ savings.previous_page_number }}">Previous</a></li>
+                    {% endif %}
+                    {% for i in savings.paginator.page_range %}
+                        <li class="{% if savings.number == i %}active{% endif %}">
+                            <a href="?saving_page={{ i }}">{{ i }}</a>
+                        </li>
+                    {% endfor %}
+                    {% if savings.has_next %}
+                        <li><a href="?saving_page={{ savings.next_page_number }}">Next</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+            {% endif %}
+
+            <hr>
+
+            <!-- PAYMENTS -->
+            <h3><b>رقم ادایگی</b></h3>
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr><th>تاریخ</th><th>رقم (₹)</th><th>نوٹ</th></tr>
+                </thead>
+                <tbody>
+                    {% for pay in payments %}
+                    <tr>
+                        <td>{{ pay.date }}</td>
+                        <td>₹{{ pay.amount|floatformat:0 }}</td>
+                        <td>{{ pay.remarks|default:"—" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="3" class="text-center">No payments found.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {% if payments.paginator.num_pages > 1 %}
+            <div class="text-center">
+                <ul class="pagination">
+                    {% if payments.has_previous %}
+                        <li><a href="?pay_page={{ payments.previous_page_number }}">Previous</a></li>
+                    {% endif %}
+                    {% for i in payments.paginator.page_range %}
+                        <li class="{% if payments.number == i %}active{% endif %}">
+                            <a href="?pay_page={{ i }}">{{ i }}</a>
+                        </li>
+                    {% endfor %}
+                    {% if payments.has_next %}
+                        <li><a href="?pay_page={{ payments.next_page_number }}">Next</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+</section>
+```
+
+</div>
+
+{% endblock %}

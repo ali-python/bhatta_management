@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block product %}active{% endblock %}
+{% block product_list %}active{% endblock %}
+{% block content %}
+{% load static %}
+
+<div class="content-wrapper">
+    <section class="content-header">
+        <ol class="breadcrumb">
+            <li><a href="{% url 'common:index' %}"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="{% url 'product:list' %}">Product List</a></li>
+            <li class="active">Update</li>
+        </ol>
+    </section>
+    <br>
+    <section class="content">
+        <div class="row">
+            <div class="col-md-6 pull-left">
+                <div class="box">
+                    <div class="box-header">
+                        <h4 class="text-center"><b>Product Update</b></h4>
+                    </div>
+                    <div class="box-body">
+                        <form action="{% url 'product:update' pk=object.id %}" method="post" autocomplete="off">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-md-12 pull-left form-group">
+                                    <label class="form-control-label">Name <span style="color:red">*</span></label>
+                                    <input type="text" name="name" class="form-control form-control-alternative" placeholder="Name" value="{{ object.name }}" required>
+                                </div>
+                                <div class="col-md-12 pull-left form-group">
+                                    <label class="form-control-label" name="category">Category<span style="color:red">*</span></label>
+                                    <select class="form-control form-control-alternative" name="category">
+                                    <option value="{{object.category.id}}">{{object.category.category}}</option>
+                                    {% for category in categories %}
+                                        <option value="{{category.id}}">{{category.category}}</option>
+                                    {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="row">
+
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 pull-right form-group">
+                                    <label class="form-control-label"></label>
+                                    <button type="submit" value="Create" class="btn btn-primary form-control">Save</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+{% endblock %}

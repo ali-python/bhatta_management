@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block wood %}active{% endblock %}
+{% block wood_dashboard %}active{% endblock %}{% block content %}
+
+
+<div class="content-wrapper">
+
+    <!-- Breadcrumb -->
+    <section class="content-header">
+        <ol class="breadcrumb">
+            <li><a href="{% url 'wood_scrapper:wood_dashboard' %}"><i class="fa fa-dashboard"></i> Wood Scraper</a></li>
+            <li><a href="{% url 'wood_scrapper:scraper_list' %}">لکڑی بورو</a></li>
+            <li class="active">پیشگی کا کھاتہ</li>
+        </ol>
+    </section>
+<br><br>
+    <section class="content">
+
+        <!-- Ledger Summary -->
+        <div class="box">
+            <div class="box-header">
+                <h3 class="text-center"><b>کھاتہ – پیشگی #{{ advance.id }}</b></h3>
+                <h4 class="text-center">Wood Scraper: {{ advance.wood_scraper.name }}</h4>
+            </div>
+
+            <div class="box-body">
+                <p><b>کل رقم:</b> {{ advance.total_amount }}</p>
+                <p><b>ٹوٹل بوری:</b> {{ advance.total_parcels }}</p>
+                <p><b>وصول شُدہ:</b> {{ advance.received_parcels }}</p>
+                <p><b>باقی:</b> {{ advance.pending_parcels }}</p>
+
+                <a href="{% url 'wood_scrapper:daily_add' advance.id %}" class="btn btn-primary mb-3">
+                    روزانہ بوری شامل کریں
+                </a>
+
+                <hr>
+
+                <!-- Daily Records Table -->
+                <h4><b>روزانہ ریکارڈ</b></h4>
+
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>تاریخ</th>
+                            <th>بوری</th>
+                            <th>نوٹس</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for d in daily %}
+                        <tr>
+                            <td>{{ d.date }}</td>
+                            <td>{{ d.parcels_received }}</td>
+                            <td>{{ d.remarks }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center text-muted">No daily records found</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+
+    </section>
+
+</div>
+
+{% endblock %}

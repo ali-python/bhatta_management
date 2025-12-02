@@ -1,0 +1,214 @@
+{% extends 'base.html' %}
+{% block worker %}active{% endblock %}
+{% block worker_home %}active{% endblock %}
+{% block content %}
+{% load static %}
+
+<div class="content-wrapper">
+
+<section class="content-header">
+    <ol class="breadcrumb">
+        <li><a href="{% url 'worker:worker_ledger' %}"><i class="fa fa-dashboard"></i> کھاتہ</a></li>
+        <li class="active">{{ worker.name }}</li>
+    </ol>
+</section>
+
+<br>
+
+<section class="content">
+<div class="box">
+    <div class="box-header">
+        <h4 class="text-center"><b>{{ worker.name }} — کھاتہ</b></h4>
+    </div>
+
+    <div class="box-body">
+        <p style="font-size: 18;"><b>فون:</b> {{ worker.phone }}</p>
+        <p style="font-size: 18%;">
+            <b>بھٹہ:</b>
+            {% for b in worker.bhattas.all %}
+                {{ b.name }}{% if not forloop.last %}, {% endif %}
+            {% empty %} <em>No bhatta assigned</em> {% endfor %}
+        </p>
+
+        <div class="text-right">
+            <a href="{% url 'worker:add_advance' worker.id %}" class="btn btn-warning btn-sm">خرچہ شامل کریں</a>
+            <a href="{% url 'worker:add_loan' worker.id %}" class="btn btn-danger btn-sm">پیشگی شامل کریں</a>
+        </div>
+
+        <hr>
+         <!-- Totals -->
+        <div class="row">
+            <div class="col-md-2" style="color: green; font-size: 18px;"><strong>کُل اِینٹیں:</strong> {{ total_bricks }}</div>
+            <div class="col-md-2" style="color:red; font-size: 18px;"><strong>کُل خرچ:</strong> {{ total_adv }}</div>
+            <div class="col-md-2" style="color: blue; font-size: 18px;"><strong>کُل پیشگی:</strong> {{ total_loan }}</div>
+            <div class="col-md-3" style="color: green; font-size: 18px;"><strong>کُل پیشگی کاٹنے:</strong> {{ total_loan_deducted }}</div>
+            <div class="col-md-2" style="color: red; font-size: 18px;"><strong>باقی پیشگی:</strong> {{ remaining_loan }}</div>
+
+        </div>
+        <br><br>
+        <!-- WEEK SEARCH -->
+        <form method="get" class="form-inline text-center" style="margin-bottom:20px;">
+            <label><b>Search Week (any date):</b></label>
+            <input type="date" name="week" value="{{ week_query }}" class="form-control">
+            <button class="btn btn-primary btn-sm">Search</button>
+            <a href="?" class="btn btn-default btn-sm">Reset</a>
+        </form>
+
+        <!-- WEEKLY BRICKS BY BHATTA -->
+        <h4>ہفتہ وار اِینٹیں</h4>
+        {% for bhatta, weekly, total_bricks in bhatta_weekly_list %}
+            <div class="box box-solid" style="margin-bottom:20px;">
+        <div class="box-header with-border">
+            <h5 class="box-title"><b>{{ bhatta.name }}</b></h5>
+            <h4 style="color:green">({{ total_bricks }} کُل اِینٹیں)</h4>
+        </div>
+                </div>
+                <a href="{% url 'worker:yearly_settlement' worker.id bhatta.id %}" class="btn btn-info btn-sm"> سالانہ حساب</a>
+
+                <div class="box-body">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>ہفتہ شروع (ہفتہ)</th>
+                                <th>ہفتہ ختم (جمعہ)</th>
+                                <th>اِینٹیں</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if weekly.object_list %}
+                                {% for w in weekly %}
+                                <tr>
+                                    <td>{{ w.week_start }}</td>
+                                    <td>{{ w.week_end }}</td>
+                                    <td>{{ w.bricks_worked }}</td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr><td colspan="3" class="text-center">No weekly reports for this bhatta</td></tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+
+                    <!-- Pagination for this bhatta -->
+                    <div class="text-center">
+                        {% if weekly.has_previous %}
+                            <a href="?weekly_page_{{ bhatta.id }}={{ weekly.previous_page_number }}" class="btn btn-default btn-sm">Prev</a>
+                        {% endif %}
+                        <span><b>{{ weekly.number }}</b> / {{ weekly.paginator.num_pages }}</span>
+                        {% if weekly.has_next %}
+                            <a href="?weekly_page_{{ bhatta.id }}={{ weekly.next_page_number }}" class="btn btn-default btn-sm">Next</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <p><em>No bhatta assigned to this worker.</em></p>
+        {% endfor %}
+
+        <hr>
+
+        <!-- ADVANCES -->
+        <h3>خرچہ</h3>
+        <table class="table table-bordered">
+            <thead>
+                <tr><th>تاریخ</th><th>رقم</th></tr>
+            </thead>
+            <tbody>
+                {% if advances.object_list %}
+                    {% for a in advances %}
+                        <tr><td>{{ a.date }}</td><td>{{ a.amount }}</td><td>{{ a.description }}</td></tr>
+                    {% endfor %}
+                {% else %}
+                    <tr><td colspan="2" class="text-center">No advances</td></tr>
+                {% endif %}
+            </tbody>
+        </table>
+        <div class="text-center">
+            {% if advances.has_previous %}
+                <a href="?adv_page={{ advances.previous_page_number }}" class="btn btn-default btn-sm">Prev</a>
+            {% endif %}
+            <span><b>{{ advances.number }}</b> / {{ advances.paginator.num_pages }}</span>
+            {% if advances.has_next %}
+                <a href="?adv_page={{ advances.next_page_number }}" class="btn btn-default btn-sm">Next</a>
+            {% endif %}
+        </div>
+
+        <hr>
+
+        <!-- LOANS -->
+        <h3>پیشگی</h3>
+        <table class="table table-bordered">
+            <thead>
+                <tr><th>تاریخ</th><th>رقم</th></tr>
+            </thead>
+            <tbody>
+                {% if loans.object_list %}
+                    {% for l in loans %}
+                        <tr><td>{{ l.date }}</td><td>{{ l.amount }}</td><td>{{ l.description }}</td></tr>
+                    {% endfor %}
+                {% else %}
+                    <tr><td colspan="2" class="text-center">No loans</td></tr>
+                {% endif %}
+            </tbody>
+        </table>
+        <div class="text-center">
+            {% if loans.has_previous %}
+                <a href="?loan_page={{ loans.previous_page_number }}" class="btn btn-default btn-sm">Prev</a>
+            {% endif %}
+            <span><b>{{ loans.number }}</b> / {{ loans.paginator.num_pages }}</span>
+            {% if loans.has_next %}
+                <a href="?loan_page={{ loans.next_page_number }}" class="btn btn-default btn-sm">Next</a>
+            {% endif %}
+        </div>
+
+        <hr>
+
+        <!-- SETTLEMENTS -->
+        <h3>سالانہ حساب</h3>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>سال</th><th>بھٹہ</th><th>اِینٹیں</th><th>ریٹ</th>
+                    <th>کُل کمائی</th><th>خرچ</th><th>پیشگی</th><th>ادا کرنی ہے</th><th>ادائیگی کی گئی</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if settlements.object_list %}
+                    {% for s in settlements %}
+                        <tr>
+                            <td>{{ s.year }}</td>
+                            <td>{{ s.bhatta.name }}</td>
+                            <td>{{ s.total_bricks }}</td>
+                            <td>{{ s.brick_rate_per_1000 }}</td>
+                            <td>{{ s.total_earned }}</td>
+                            <td>{{ s.total_advance }}</td>
+                            <td>{{ s.total_loan_deducted }}</td>
+                            <td>{{ s.amount_to_pay }}</td>
+                            <td>{{ s.payment_made }}</td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr><td colspan="8" class="text-center">No settlements</td></tr>
+                {% endif %}
+            </tbody>
+        </table>
+        <div class="text-center">
+            {% if settlements.has_previous %}
+                <a href="?settle_page={{ settlements.previous_page_number }}" class="btn btn-default btn-sm">Prev</a>
+            {% endif %}
+            <span><b>{{ settlements.number }}</b> / {{ settlements.paginator.num_pages }}</span>
+            {% if settlements.has_next %}
+                <a href="?settle_page={{ settlements.next_page_number }}" class="btn btn-default btn-sm">Next</a>
+            {% endif %}
+        </div>
+
+        <hr>
+
+       
+
+    </div>
+</div>
+</section>
+</div>
+
+{% endblock %}

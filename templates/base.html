@@ -1,0 +1,256 @@
+{% load static %}
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>بھٹا کا نظام</title>
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <link rel="stylesheet" href="{% static 'bower_components/bootstrap/dist/css/bootstrap.min.css' %}">
+    <link rel="stylesheet" href="{% static 'bower_components/font-awesome/css/font-awesome.min.css' %}">
+    <link rel="stylesheet" href="{% static 'bower_components/Ionicons/css/ionicons.min.css' %}">
+    <link rel="stylesheet" href="{% static 'bower_components/jvectormap/jquery-jvectormap.css' %}">
+    <link rel="stylesheet" href="{% static 'dist/css/AdminLTE.min.css' %}">
+    <link rel="stylesheet" href="{% static 'dist/css/skins/_all-skins.min.css' %}">
+
+    <!-- Google Font -->
+    <link rel="stylesheet"
+          href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+<div class="wrapper">
+
+    <header class="main-header">
+
+        <!-- Logo -->
+        <a href="#" class="logo">
+            <!-- mini logo for sidebar mini 50x50 pixels -->
+            <span class="logo-mini"><b>BH</b></span>
+            <!-- logo for regular state and mobile devices -->
+            <span class="logo-lg"><b>بھٹا کا نظام</b></span>
+        </a>
+
+        <!-- Header Navbar: style can be found in header.less -->
+        <nav class="navbar navbar-static-top">
+            <!-- Sidebar toggle button-->
+            <a href="#" class="sidebar-toggle" data-toggle="push-menu" role="button">
+                <span class="sr-only">Toggle navigation</span>
+            </a>
+            <div  class="header">
+                <span style="color:white;"><h4><b>بھٹا کا نظام</b></h4></span>
+            </div>
+            <!-- Navbar Right Menu -->
+            <div class="navbar-custom-menu">
+                <ul class="nav navbar-nav">
+                   
+                </ul>
+            </div>
+
+        </nav>
+    </header>
+    <!-- Left side column. contains the logo and sidebar -->
+    <aside class="main-sidebar">
+        <!-- sidebar: style can be found in sidebar.less -->
+        <section class="sidebar">
+            <!-- search form -->
+            <ul class="sidebar-menu" data-widget="tree">
+                <li class="header">Main Navigation</li>
+                 <li class="treeview {% block product %}{% endblock %}">
+                    <a href="#">
+                        <i class="fa fa-product-hunt"></i> <span>اسٹاک اینٹ  </span>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                        <!-- <li class="{% block add_category %}{% endblock %}"><a href="{% url 'product:add_category' %}"><i class="fa fa-circle-o"></i>Add Category</a></li> -->
+                        <li class="{% block add_product %}{% endblock %}"><a href="{% url 'product:add' %}"><i class="fa fa-circle-o"></i>اید اینٹ</a></li>
+                        <li class="{% block product_list %}{% endblock %}"><a href="{% url 'product:list' %}"><i class="fa fa-circle-o"></i>لیسٹ اینٹ</a></li>
+                    </ul>
+                </li>
+                <!-- <li class="treeview {% block employee %}{% endblock %}">
+                    <a href="#">
+                        <i class="fa fa-user"></i> <span>Employees</span>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                        <li class="{% block e_employee_create %}{% endblock %}"><a href="{% url 'employee:add' %}"><i class="fa fa-circle-o"></i>Add Employee</a></li>
+                        <li class="{% block e_employee_list %}{% endblock %}"><a href="{% url 'employee:list' %}"><i class="fa fa-circle-o"></i>Employee List</a></li>
+                    </ul>
+                </li> -->
+                <li class="treeview {% block brickout %}{% endblock %}">
+                    <a href="#">
+                        <i class="fa fa-user"></i> <span>نکال</span>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                        <li class="{% block brickout_create %}{% endblock %}"><a href="{% url 'bricks_out:brickrate_create' %}"><i class="fa fa-circle-o"></i> نکال ریٹ</a></li>
+                        <li class="{% block employee_create %}{% endblock %}"><a href="{% url 'employee:add' %}"><i class="fa fa-circle-o"></i>نئے مزدور کا اندراج کریں</a></li>
+                        <li class="{% block employee_list %}{% endblock %}"><a href="{% url 'employee:list' %}"><i class="fa fa-circle-o"></i>مزدور کی لِسٹ</a></li>
+                        <li class="{% block brickout_list %}{% endblock %}"><a href="{% url 'bricks_out:brickrate_list' %}"><i class="fa fa-circle-o"></i>نکال کا ریٹ</a></li>
+                        <li class="{% block brickout_create_out %}{% endblock %}"><a href="{% url 'bricks_out:brickwork_create' %}"><i class="fa fa-circle-o"></i>مزدور نکاسی رِیکارڈ</a></li>
+                        <li class="{% block brickout_list_out %}{% endblock %}"><a href="{% url 'bricks_out:brickwork_list' %}"><i class="fa fa-circle-o"></i>  نکاسی لِسٹ</a></li>
+                        <li class="{% block brickout_create_advance %}{% endblock %}"><a href="{% url 'bricks_out:advance_create' %}"><i class="fa fa-circle-o"></i>ایڈوانس</a></li>
+                        <li class="{% block brickout_list_advance %}{% endblock %}"><a href="{% url 'bricks_out:advance_list' %}"><i class="fa fa-circle-o"></i> ایڈوانس لِسٹ</a></li>
+                        <li class="{% block brick_payment_create %}{% endblock %}"><a href="{% url 'payment:payment_add' %}"><i class="fa fa-circle-o"></i>ادائیگی کریں</a></li>
+                        <li class="{% block brick_payment_list %}{% endblock %}"><a href="{% url 'payment:payment_list' %}"><i class="fa fa-circle-o"></i>لِسٹ ادائیگی</a></li>
+                        <li class="{% block brick_out_loan %}{% endblock %}"><a href="{% url 'bricks_out:add_loan' %}"><i class="fa fa-circle-o"></i>پیشگی</a></li>
+                        <li class="{% block brick_out_saving %}{% endblock %}"><a href="{% url 'bricks_out:add_saving' %}"><i class="fa fa-circle-o"></i>جمع</a></li>
+                        <li class="{% block brickout_weekly_summary %}{% endblock %}"><a href="{% url 'bricks_out:weekly_summary' %}"><i class="fa fa-circle-o"></i>ہفتہ وار رپورٹ</a></li>
+
+                    </ul>
+                </li>
+                <li class="treeview {% block customer %}{% endblock %}">
+                    <a href="#">
+                        <i class="fa fa-user"></i> <span>گاہک</span>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                        <li class="{% block customer_create %}{% endblock %}"><a href="{% url 'tractor:customer_create' %}"><i class="fa fa-circle-o"></i>نئے گاہک کا اندراج کریں</a></li>
+                        <li class="{% block customer_list %}{% endblock %}"><a href="{% url 'tractor:customer_list' %}"><i class="fa fa-circle-o"></i>گاہکوں کی فہرست</a></li>
+                    </ul>
+                </li>
+                <li class="treeview {% block tractor %}{% endblock %}">
+                    <a href="#">
+                        <i class="fa fa-user"></i> <span>ٹریکٹر کا کھاتہ</span>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                        <li class="{% block tractor_dashboard %}{% endblock %}"><a href="{% url 'tractor:dashboard' %}"><i class="fa fa-circle-o"></i>ڈیش بورڈ</a></li>
+                        <!-- <li class="{% block tractor_create %}{% endblock %}"><a href="{% url 'tractor:tractor_create' %}"><i class="fa fa-circle-o"></i>Add Tractor</a></li> -->
+                        <li class="{% block tractor_list %}{% endblock %}"><a href="{% url 'tractor:tractor_list' %}"><i class="fa fa-circle-o"></i>ٹریکٹر کی لیسٹ</a></li>
+                        <!-- <li class="{% block tractor_employee_add %}{% endblock %}"><a href="{% url 'tractor:employee_create' %}"><i class="fa fa-circle-o"></i>Add Tractor Employee</a></li> -->
+                        <li class="{% block tractor_employee_list %}{% endblock %}"><a href="{% url 'tractor:employee_list' %}"><i class="fa fa-circle-o"></i>ٹریکٹر مزدور کی لیسٹ</a></li>
+                        <!-- <li class="{% block tractor_trip_create %}{% endblock %}"><a href="{% url 'tractor:trip_create' %}"><i class="fa fa-circle-o"></i>Tractor Trip Create</a></li> -->
+                        <li class="{% block tractor_trip_list %}{% endblock %}"><a href="{% url 'tractor:trip_list' %}"><i class="fa fa-circle-o"></i>ٹریکٹر ٹرپ کی لیسٹ</a></li>
+                        <!-- <li class="{% block tractor_advance_create %}{% endblock %}"><a href="{% url 'tractor:advance_create' %}"><i class="fa fa-circle-o"></i>Tractor Advance Create</a></li> -->
+                        <li class="{% block tractor_advance_list %}{% endblock %}"><a href="{% url 'tractor:advance_list' %}"><i class="fa fa-circle-o"></i>ٹریکٹر ایڈوانس کی لیسٹ</a></li>
+                        <!-- <li class="{% block tractor_payment_create %}{% endblock %}"><a href="{% url 'tractor:payment_create' %}"><i class="fa fa-circle-o"></i>Tractor Payment Create</a></li> -->
+                        <li class="{% block tractor_payment_list %}{% endblock %}"><a href="{% url 'tractor:payment_list' %}"><i class="fa fa-circle-o"></i>ٹریکٹر ادائیگی کی لیسٹ</a></li>
+                        <li class="{% block tractor_weekly_summary %}{% endblock %}"><a href="{% url 'tractor:weekly_summary' %}"><i class="fa fa-circle-o"></i>ہفتہ وار رپورٹ</a></li>
+                    </ul>
+
+                </li>
+                
+                <li class="header">بھٹہ کیری مزدور</li>
+                <li class="treeview {% block hourly_employee %}{% endblock %}">
+                    <a href="#">
+                        <i class="fa fa-money"></i> <span>بھٹہ کیری مزدور</span>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                        <li class="{% block hourly_employee_dashboard %}{% endblock %}"><a href="{% url 'hourly:employees_dashboard' %}"><i class="fa fa-circle-o"></i> <span>بھٹہ کیری مزدور</span></a></li>
+                    </ul>
+                </li>
+                <li class="header">کالبی</li>
+                <li class="treeview {% block raw_bricks_employee %}{% endblock %}">
+                    <a href="#">
+                        <i class="fa fa-shopping-cart"></i> <span>کالبی</span>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                        <li class="{% block raw_bricks_employee_dashboard %}{% endblock %}"><a href="{%  url 'raw_bricks_employee:dashboard' %}"><i class="fa fa-circle-o"></i> <span>کالبی</span></a></li>
+                    </ul>
+                </li>
+                
+                <li class="header">کچی اِینٹ بھرائی</li>
+                <li class="treeview {% block kachi_ent_bharai %}{% endblock %}">
+                    <a href="#">
+                        <i class="fa fa-history"></i> <span> کچی اِینٹ بھرائی </span>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                        <li class="{% block kachi_ent_dashboard %}{% endblock %}"><a href="{% url 'kachi_ent_bharai:dashboard' %}"><i class="fa fa-circle-o"></i> <span>ڈیش بورڈ</span></a></li>
+                        <!-- <li class="{% block monthly_stock_logs %}{% endblock %}"><a href="#"><i class="fa fa-circle-o"></i>Monthly Logs</a></li> -->
+                    </ul>
+                </li>
+                
+                <li class="treeview {% block worker %}{% endblock %}">
+                    <a href="#">
+                        <i class="fa fa-copy"></i> <span>بھٹہ مِستری  </span>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                        <li class="{% block worker_home %}{% endblock %}"><a href="{% url 'worker:home' %}"><i class="fa fa-circle-o"></i> <span> بھٹہ مِستری  </span></a></li>
+                    </ul>
+                </li> 
+                <li class="treeview {% block wood %}{% endblock %}">
+                    <a href="#">
+                        <i class="fa fa-copy"></i> <span> بورو   </span>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                        <li class="{% block wood_dashboard %}{% endblock %}"><a href="{% url 'wood_scrapper:wood_dashboard' %}"><i class="fa fa-circle-o"></i> <span>بورو ڈیش بورڈ</span></a></li>
+                    </ul>
+                </li> 
+                <li class="header">اِخراجات</li>
+                <li class="treeview {% block expense %}{% endblock %}">
+                    <a href="#">
+                        <i class="fa fa-money"></i> <span>اخراجات کا نظام</span>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                        <li class="{% block add_expense %}{% endblock %}"><a href="{% url 'expense:add' %}"><i class="fa fa-circle-o"></i> <span>اخراجات شامل کریں</span></a></li>
+                        <li class="{% block expense_list %}{% endblock %}"><a href="{% url 'expense:list' %}"><i class="fa fa-circle-o"></i>اخراجات کی لیسٹ</a></li>
+                    </ul>
+                </li>
+                <li class="header">User</li>
+                 <li>
+                    <a href="{% url 'common:logout' %}"><i class="fa fa-sign-out"></i> <span>Logout</span></a>
+                </li>
+                <!-- <li>
+                    <a href="{% url 'admin:index' %}"><i class="fa fa-sign-in"></i> <span>Admin Pannel</span></a>
+                </li> -->
+            </ul>
+        </section>
+    </aside>
+
+    <!-- Content Wrapper. Contains page content -->
+    {% block content %}{% endblock %}
+    <!-- /.content-wrapper -->
+
+    <footer class="main-footer">
+        <div class="pull-right hidden-xs">
+            <b>Version</b> 2.4.18
+        </div>
+        <strong>Copyright &copy; 2025 <a href="#">بھٹا کا نظام</a>.</strong> All rights
+        reserved.
+    </footer>
+</div>
+
+{% block script %}
+    <script src="{% static 'js/jquery.js' %}"></script>
+    <script src="{% static 'js/jquery-1.8.3.min.js' %}"></script>
+    <script src="{% static 'bower_components/jquery/dist/jquery.min.js' %}"></script>
+    <script src="{% static 'bower_components/bootstrap/dist/js/bootstrap.min.js' %}"></script>
+    <script src="{% static 'bower_components/fastclick/lib/fastclick.js' %}"></script>
+    <script src="{% static 'dist/js/adminlte.min.js' %}"></script>
+    <script src="{% static 'bower_components/jquery-sparkline/dist/jquery.sparkline.min.js' %}"></script>
+    <script src="{% static 'plugins/jvectormap/jquery-jvectormap-1.2.2.min.js' %}"></script>
+    <script src="{% static 'plugins/jvectormap/jquery-jvectormap-world-mill-en.js' %}"></script>
+    <script src="{% static 'bower_components/jquery-slimscroll/jquery.slimscroll.min.js' %}"></script>
+    <script src="{% static 'bower_components/chart.js/Chart.js' %}"></script>
+    <script src="{% static 'dist/js/demo.js' %}"></script>
+
+{% endblock %}
+</body>
+</html>

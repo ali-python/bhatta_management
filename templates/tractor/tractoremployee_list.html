@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block tractor %}active{% endblock %}
+{% block tractor_employee_list %}active{% endblock %}
+{% block content %}
+<div class="content-wrapper">
+    <section class="content-header">
+        <ol class="breadcrumb">
+            <li><a href="{% url 'common:index' %}"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active"> ٹریکٹر مزدور لیسٹ </li>
+        </ol>
+    </section>
+    <br>
+    <section class="content">
+        <div class="box">
+            <div class="box-header text-center">
+                <h4><b>ٹریکٹر مزدور</b></h4>
+            </div>
+            <div class="box-body">
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>نام</th>
+                            <th>فون</th>
+                            <th>کردار</th>
+                            <th>عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for emp in object_list %}
+                        <tr>
+                            <td>{{ emp.name }}</td>
+                            <td>{{ emp.phone }}</td>
+                            <td>{{ emp.get_role_display }}</td>
+                            <td>
+                                <a href="{% url 'tractor:employee_update' emp.id %}" class="btn btn-xs btn-info">ٹریکٹر</a>
+                                <a href="{% url 'tractor:employee_ledger' emp.id %}" class="btn btn-xs btn-info">کھاتہ</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="4" class="text-center">No tractor employees found</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

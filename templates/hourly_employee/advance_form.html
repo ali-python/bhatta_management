@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="content-wrapper p-4">
+
+    <section class="content-header mb-4">
+        <h3 class="mb-0"> خرچہ</h3>
+        <small class="text-muted">کیری مزدور کے لئے ایڈوانس ادائیگی کا ریکارڈ</small>
+    </section>
+
+    <section class="content">
+
+        <div class="card shadow-sm border-warning p-4">
+            <form method="post">
+                {% csrf_token %}
+
+                {% for field in form %}
+                <div class="mb-3">
+                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <div class="text-danger mt-1 small">{{ field.errors }}</div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                <br>
+                <button type="submit" class="btn btn-warning">
+                    Save Advance
+                </button>
+                <a href="{% url 'hourly:employees_dashboard' %}" class="btn btn-secondary ms-2">
+                    Cancel
+                </a>
+            </form>
+        </div>
+
+    </section>
+</div>
+
+{% endblock %}

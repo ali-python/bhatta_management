@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block expense %}active{% endblock %}
+{% block add_expense %}active{% endblock %}
+{% block content %}
+{% load static %}
+<div class="content-wrapper">
+    <section class="content-header">
+        <ol class="breadcrumb">
+            <li><a href="{% url 'common:index' %}"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">اِخراجات شامل کریں</li>
+        </ol>
+    </section>
+    <br>
+    <section class="content">
+        <div class="row">
+            <div class="col-md-6 pull-left">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="text-center"><b>اِخراجات شامل کریں</b></h3>
+                    </div>
+                    <div class="box-body">
+                        <form action="{% url 'expense:add' %}" method="post" autocomplete="off">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-md-12 pull-left form-group">
+                                    <label class="form-control-label">رقم <span style="color:red">*</span></label>
+                                    <input type="text" name="amount" class="form-control form-control-alternative" placeholder="رقم" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12 pull-left form-group">
+                                    <label class="form-control-label">تاریخ <span style="color:red">*</span></label>
+                                    <input type="date" name="date" class="form-control form-control-alternative" placeholder="تاریخ" onfocus="(this.type='date')" onblur="(this.type='text')" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-12 pull-left form-group">
+                                    <label class="form-control-label">تفصیل <span style="color:red">*</span></label>
+                                    <input type="text" name="description" class="form-control form-control-alternative" placeholder="تفصیل">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 pull-right form-group">
+                                    <label class="form-control-label"></label>
+                                    <button type="submit" value="Create" class="btn btn-primary form-control">Save</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+{% endblock %}

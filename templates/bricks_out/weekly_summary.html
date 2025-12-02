@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block brickout %}active{% endblock %}
+{% block brickout_weekly_summary %}active{% endblock %}
+{% block content %}
+{% load static %}
+
+<div class="content-wrapper">
+
+    <section class="content-header">
+        <ol class="breadcrumb">
+            <li>
+                <a href="{% url 'common:index' %}">
+                    <i class="fa fa-dashboard"></i> Home
+                </a>
+            </li>
+            <li class="active">ہفتہ وار خلاصہ</li>
+        </ol>
+    </section>
+
+    <br>
+
+    <section class="content">
+        <div class="box">
+
+            <div class="box-header text-center">
+                <h4><b>ہفتہ وار خلاصہ</b></h4>
+            </div>
+
+            <div class="box-body">
+
+                <!-- Date Filter Form -->
+                <form method="get" class="form-inline mb-3" style="margin-bottom: 20px;">
+
+                    <div class="form-group">
+                        <label class="mr-2"><b>From:</b></label>
+                        <input type="date" 
+                               name="start_date" 
+                               class="form-control"
+                               value="{{ start_date }}">
+                    </div>
+
+                    <div class="form-group ml-3">
+                        <label class="mr-2"><b>To:</b></label>
+                        <input type="date" 
+                               name="end_date" 
+                               class="form-control"
+                               value="{{ end_date }}">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary ml-3">
+                        Filter
+                    </button>
+
+                    <a href="{% url 'bricks_out:weekly_summary' %}" class="btn btn-default ml-2">
+                        Reset
+                    </a>
+
+                </form>
+
+                <!-- Summary Table -->
+                <table class="table table-bordered table-striped">
+                    <thead class="bg-light">
+                        <tr>
+                            <th>مزدور</th>
+                            <th>ٹوٹل اینٹ</th>
+                            <th>ٹوٹل رقم (₹)</th>
+                            <th>خرچہ (₹)</th>
+                            <th>بقایا (₹)</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for data in summary_data %}
+                        <tr>
+                            <td>{{ data.employee.name }}</td>
+                            <td>{{ data.total_bricks|floatformat:0 }}</td>
+                            <td>₹{{ data.total_amount|floatformat:0 }}</td>
+                            <td>₹{{ data.total_advance|floatformat:0 }}</td>
+                            <td><b>₹{{ data.balance|floatformat:0 }}</b></td>
+                        </tr>
+
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">
+                                No data available for selected dates
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </section>
+</div>
+
+{% endblock %}

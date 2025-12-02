@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block brickout %}active{% endblock %}
+{% block brickout_create_advance %}active{% endblock %}
+{% block content %}
+{% load static %}
+
+<div class="content-wrapper">
+    <section class="content-header">
+        <ol class="breadcrumb">
+            <li><a href="{% url 'common:index' %}"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">{% if object %}اپ ڈیٹ{% else %}دَرج کرنا{% endif %} ایڈوانس ادائیگی</li>
+        </ol>
+    </section>
+    <br>
+    <section class="content">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h4 class="text-center"><b>{% if object %}اپ ڈیٹ{% else %}دَرج کرنا{% endif %} ایڈوانس ادائیگی</b></h4>
+                    </div>
+                    <div class="box-body">
+                        <form method="post" autocomplete="off">
+                            {% csrf_token %}
+                            <div class="row">
+                                <div class="col-md-4 form-group">
+                                    <label>مزدور <span style="color:red">*</span></label>
+                                    {{ form.employee }}
+                                </div>
+                                <div class="col-md-4 form-group">
+                                    <label>تاریخ <span style="color:red">*</span></label>
+                                    {{ form.date }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 form-group">
+                                    <label>رقم (₹) <span style="color:red">*</span></label>
+                                    {{ form.amount }}
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-2 form-group">
+                                    <button type="submit" class="btn btn-primary form-control">Save</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

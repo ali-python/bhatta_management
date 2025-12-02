@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+{% block tractor %}active{% endblock %}
+{% block tractor_trip_list %}active{% endblock %}
+{% load static %}
+
+{% block content %}
+
+<style>
+/* ---------- GENERAL CLEANUP ---------- */
+.print-header h1, .print-header h2, .print-header p, .print-header small {
+    margin: 0;
+    padding: 0;
+    line-height: 1.2;
+}
+
+/* ---------- PRINT MODE OPTIMIZED ---------- */
+@media print {
+    .print-invoice-btn, .breadcrumb, nav, footer {
+        display: none !important;
+    }
+
+    table, th, td {
+        border: 1px solid #000 !important;
+        border-collapse: collapse !important;
+        font-size: 10px !important;
+    }
+
+    .f-size { font-size: 10px !important; }
+
+    body { zoom: 90%; }
+}
+</style>
+
+<div class="content-wrapper">
+
+<section class="content-header">
+    <button type="button" class="btn btn-primary print-invoice-btn" onclick="PrintInvoice('print-invoice')">Print Invoice</button>
+
+    <ol class="breadcrumb">
+        <li><a href="{% url 'common:index' %}"><i class="fa fa-dashboard"></i> Home</a></li>
+        <li class="active">Invoice View</li>
+    </ol>
+</section>
+
+
+<section class="content">
+<div class="row">
+<div class="col-lg-12">
+<div class="box">
+<div class="box-body">
+
+<div class="row print-invoice" id="print-invoice">
+
+<!-- ===================== HEADER ===================== -->
+<div class="col-lg-12 text-center">
+
+    <div class="print-header" style="display:flex;flex-direction:column;align-items:center;text-align:center;">
+
+        <h1 style="font-size:28px;font-weight:bold;">
+            حاجی عبدالنبی بروہی برکس بٹھہ
+        </h1>
+
+        <div style="display:flex;justify-content:space-between;width:100%;max-width:700px;margin-top:5px;">
+
+            <!-- Left -->
+            <div style="text-align:left;">
+                <h2 style="font-size:15px;">بہاول</h2>
+                <p style="font-size:13px;">030726036452 – 03163119481</p>
+                <small style="font-size:11px;">منشی</small>
+            </div>
+
+            <!-- Right -->
+            <div style="text-align:right;">
+                <h2 style="font-size:15px;">انچارج</h2>
+                <p style="font-size:13px;">03267027633 – A حمید</p>
+            </div>
+
+        </div>
+    </div>
+
+    <span><strong>ایڈریس: </strong>نزد عاقل پور ڈنگر ایئرپورٹ روڈ جیکب آباد</span>
+    <hr>
+    <h2><strong>انوایس</strong></h2>
+</div>
+
+
+
+<!-- ===================== CUSTOMER & INVOICE DETAIL ===================== -->
+<div class="col-lg-12">
+<div class="content-panel" style="padding:5px;">
+
+<div class="row">
+
+    <div class="col-lg-6" style="font-size:18px;">
+        {% if invoice.customer %}
+        <div class="col-lg-12">
+            <label><strong class="f-size">گاہک:</strong></label>
+            <span class="f-size">{{ invoice.customer.name|title }}</span>
+        </div>
+
+        <div class="col-lg-12">
+            <label><strong class="f-size">فون نمبر:</strong></label>
+            <span class="f-size">{{ invoice.customer.phone }}</span>
+        </div>
+
+        <div class="col-lg-12">
+            <label><strong class="f-size">ایڈریس:</strong></label>
+            <span class="f-size">{{ invoice.customer.address }}</span>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="col-lg-6 text-right" style="font-size:18px;">
+        <div class="col-lg-12">
+            <label><strong class="f-size">تاریخ:</strong></label>
+            <span class="f-size">{{ invoice.date|date:"d-m-y" }}</span>
+        </div>
+
+        <div class="col-lg-12">
+            <label><strong class="f-size">رسید نمبر:</strong></label>
+            <span class="f-size">{{ invoice.id|stringformat:"07d"|title }}</span>
+        </div>
+
+        <div class="col-lg-12">
+            <label><strong class="f-size">ڈرائیور:</strong></label>
+            <span class="f-size">{{ invoice.driver.name|title }}</span>
+        </div>
+    </div>
+
+</div>
+
+
+<br>
+
+<!-- ===================== TABLE ===================== -->
+<div class="row">
+<div class="col-md-12">
+
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>ڈرائیور</th>
+                <th>تعداد</th>
+                <th>ٹوٹل</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ invoice.brick_type|title }}</td>
+                <td>{{ invoice.bricks_carried|floatformat:-0 }}</td>
+                <td>{{ invoice.customer_amount|floatformat:-0 }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+</div>
+</div>
+
+<!-- ===================== FOOTER ===================== -->
+<div class="row text-center">
+    <strong style="font-size:12px;color:#000">شکریہ</strong><br>
+    <strong class="f-size">حاجی عبدالنبی بروہی برکس بٹھہ</strong><br>
+    <small>Softbus Softwares : +923428053402</small>
+</div>
+
+</div>
+</div>
+</div>
+
+
+</div>
+</div>
+</div>
+</section>
+</div>
+
+<script>
+function PrintInvoice(divName){
+    var printContents = document.getElementById(divName).innerHTML;
+    var originalContents = document.body.innerHTML;
+
+    document.body.innerHTML = printContents;
+    window.print();
+    document.body.innerHTML = originalContents;
+}
+</script>
+
+{% endblock %}

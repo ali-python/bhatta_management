@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>Trip Receipt</h3>
+<p>Customer: {{ trip.customer.name }}</p>
+<p>Date: {{ trip.date }}</p>
+<p>Tractor: {{ trip.tractor.name }}</p>
+<p>Driver: {{ trip.driver.name }}</p>
+<p>Conductor: {{ trip.conductor.name }}</p>
+<p>Bricks Carried: {{ trip.bricks_carried }}</p>
+<p>Total Amount: ₹{{ trip.trip_amount }}</p>
+{% endblock %}

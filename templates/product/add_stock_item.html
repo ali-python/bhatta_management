@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% block product %}active{% endblock %}
+{% block product_list %}active{% endblock %}
+{% block content %}
+{% load static %}
+
+<div class="content-wrapper">
+    <section class="content-header">
+        <ol class="breadcrumb">
+            <li><a href="{% url 'common:index' %}"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="{% url 'product:list' %}">لیسٹ</a></li>
+            <li><a href="{% url 'product:stockin_detail' pk=product.id %}">اسٹوک ان کی لیسٹ</a></li>
+        </ol>
+    </section>
+    <br>
+    <section class="content">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="text-center"><b>اسٹوک ان</b></h3>
+                    </div>
+                    <div class="box-body">
+                        <form class="form-horizontal product_item_form" action="{% url 'product:add_stock' pk=product.id %}" method="post" autocomplete="off">
+                            {% csrf_token %}
+                            <input type="hidden" name="purchased_item" value="0">
+                            <input type="hidden" name="product" value="{{ product.id }}">
+                            <input type="hidden" name="retail_price" value="0">
+                            <div class="row">
+                                <div class="col-md-6 pull-left">
+                                    <label class="form-control-label" >نام<span style="color:red">*</span></label>
+                                    <input type="text"  class="form-control form-control-alternative" value="{{product.name}} | {{product.category.category}}" readonly>
+                                </div>
+                                <div class="col-md-6 pull-right">
+                                    <input type="hidden" name="product" class="form-control form-control-alternative" value="{{product.id}}" >
+                                    <label class="form-control-label"> تعداد<span style="color:red">*</span></label>
+                                    <input type="text"  class="form-control quantity"  name="stock_quantity" id="quantity"  placeholder="دستیاب تعداد" required>
+                                </div>
+                            </div>
+                            <!-- <div class="row">
+                                <div class="col-md-6 pull-left">
+                                    <label class="form-control-label">Buying Price / Item<span style="color:red">*</span></label>
+                                    <input type="text"  class="form-control buying_price_item"  name="buying_price_item" id="buying_price_item" placeholder="Buying Price Per Item" required>
+                                </div>
+                                <div class="col-md-6 pull-right">
+                                    <label class="form-control-label">Selling Price / Item<span style="color:red">*</span></label>
+                                    <input type="text"  class="form-control price_per_item"  name="price_per_item" id="price_per_item"  onkeyup="sum()" placeholder="Price Per Item" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 pull-left">
+                                    <label class="form-control-label">Buying Percent<span style="color:red">*</span></label>
+                                    <input type="text"  class="form-control buying_percent"  name="buying_percent" id="buying_percent" value="0" required>
+                                </div>
+                                <div class="col-md-6 pull-right">
+                                    <label class="form-control-label">Selling Price / Item<span style="color:red">*</span></label>
+                                    <input type="text"  class="form-control selling_percent"  name="selling_percent" id="selling_percent" value="0" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 pull-left">
+                                    <label><strong>Total Buying Amount</strong></label>
+                                    <input type="text"  class="form-control total_buying_amount"  name="total_buying_amount"  id="total_buying_amount" placeholder="Total Buying Amount" readonly>
+                                </div>
+                                <div class="col-md-6 pull-right">
+                                    <label><strong>Total Selling Amount</strong></label>
+                                    <input type="text"  class="form-control total_amount"  name="total_amount"  id="total_amount" placeholder="Total Selling Amount" readonly>
+                                </div>
+                            </div> -->
+                            <div class="row">
+                                <div class="col-md-6 pull-left">
+                                    <label><strong>تاریخ</strong></label>
+                                    <input type="text"  class="form-control dated_order"  name="dated_order"  onkeyup="checkDec(this);" placeholder="Date Stock In" onfocus="(this.type='date')" onblur="(this.type='text')"><br>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-2 pull-left">
+                                    <button type="button"  class="btn btn-primary product-sub-btn" style="width: 100%">Save Stock</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+
+{% endblock %}
+
+{% block script %}
+    {{ block.super }}
+ <script>
+        $(document).ready(function(){
+
+            $('.buying_price_item').on('change', function(){
+                $('.total_buying_amount').val(Number($(this).val()) * Number($('.quantity').val()));
+            });
+
+            $('.quantity').on('change', function(){
+                if ($('.buying_price_item').val()) {
+                    $('.total_buying_amount').val(Number($('.buying_price_item').val()) * Number($(this).val()));
+                }
+                if ($('.price_per_item').val()) {
+                    $('.total_amount').val(Number($('.price_per_item').val()) * Number($(this).val()));
+                }
+            });
+
+            $(".product-sub-btn").on ('click', function(){
+                $(this).addClass('disabled');
+                $(this).html('<i class="fa fa-circle-o-notch fa-spin"></i> Loading...');
+                var error= false;
+
+                if ($('.product-error').val() == ""){
+                    $('.product-error').show();
+                    error = true;
+                }
+                else {
+                    $('.product-error').hide();
+                }
+                if ($('.quantity').val () == ""){
+                    $('.item-error').show();
+                    error = true;
+                }
+                else {
+                    $('.item-error').hide();
+                }
+                if (error == true) {
+                    $(this).removeClass('disabled');
+                    $(this).html('Save Customer');
+                    return;
+                }
+                else
+                {
+                    $('.product_item_form').submit();
+
+                }
+
+            });
+
+
+
+        });
+
+        $('.product-error').keyup (function(){
+            $('.product-error').hide();
+        });
+
+        function checkDec(el){
+            var ex = /^[0-9]+\.?[0-9]*$/;
+            if(ex.test(el.value)==false){
+                el.value = el.value.substring(0,el.value.length - 1);
+            }
+        }
+
+        $('.quantity').keyup (function(){
+            $('.item-error').hide();
+        });
+
+        function checkDec(el){
+            var ex = /^[0-9]+\.?[0-9]*$/;
+            if(ex.test(el.value)==false){
+                el.value = el.value.substring(0,el.value.length - 1);
+            }
+        }
+
+
+        $('.form-control').click (function () {
+            $('.list-error').hide();
+            checkDec(this);
+
+        });
+        function sum() {
+            var txtFirstNumberValue = document.getElementById('quantity').value;
+            var txtSecondNumberValue = document.getElementById('price_per_item').value;
+            var result = parseInt(txtFirstNumberValue) * parseInt(txtSecondNumberValue);
+            if (!isNaN(result)) {
+                document.getElementById('total_amount').value = result;
+            }
+        }
+    </script>
+
+{% endblock %}

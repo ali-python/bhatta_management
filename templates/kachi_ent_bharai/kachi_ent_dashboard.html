@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% block kachi_ent_bharai %}active{% endblock %}                 
+{% block kachi_ent_dashboard %}active{% endblock %}
+{% block content %}
+
+<div class="content-wrapper p-4" style="margin-left: 15px;">
+
+    <div class="content-wrapper">
+
+        <!-- Title -->
+        <div class="mb-3">
+            <h3>کچی اِینٹ بھرائی</h3>
+        </div>
+
+        <!-- Week Navigation -->
+        <div class="d-flex justify-content-between mb-3">
+
+            <a href="{% url 'kachi_ent_bharai:dashboard' %}?week={{ prev_week }}" 
+            class="btn btn-outline-primary">
+                ← Previous Week
+            </a>
+
+            <a href="{% url 'kachi_ent_bharai:dashboard' %}?week={{ next_week }}" 
+            class="btn btn-outline-primary">
+                Next Week →
+            </a>
+            
+
+        </div>
+
+        <!-- Add Employee -->
+        <div class="card p-3 shadow-sm border-primary mb-4">
+            <h4>خرکار شامل کریں</h4>
+
+            <form method="post">
+                {% csrf_token %}
+
+                <div class="row">
+                    {% for field in form %}
+                    <div class="col-md-4 mb-2">
+                        <label>{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}
+                        <small class="text-danger">{{ field.errors }}</small>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                <br>
+                <button type="submit" name="add_employee" class="btn btn-primary mt-2">
+                    خرکار شامل کریں
+                </button>
+            </form>
+        </div>
+
+        <!-- Brick Work Sheet -->
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="d-flex gap-2 mb-3">
+                <button type="submit" name="update_bricks" class="btn btn-success">
+                    Save
+                </button>
+
+                <a href="{% url 'kachi_ent_bharai:add_advance' %}" class="btn btn-warning">خرچہ شامل کریں</a>
+                <a href="{% url 'kachi_ent_bharai:add_saving' %}" class="btn btn-info">جمع</a>
+                <a href="{% url 'kachi_ent_bharai:add_loan' %}" class="btn btn-danger">پیشگی شامل کریں</a>
+
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped text-center">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>مزدور</th>
+                            <th>کل اینٹ</th>
+                            {% for d in week_dates %}
+                            <th>
+                                {{ d|date:"D" }} <br>
+                                {{ d|date:"d M" }}
+                            </th>
+                            {% endfor %}
+
+                            <th>ٹوٹل (₹)</th>
+                            <th>خرچہ</th>
+                            <th>جمع</th>
+                            <th>پیشگی</th>
+                            <th>ادا شُدہ</th>
+                            
+                            <th>باقی</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for row in table %}
+                        <tr>
+                            <td>
+                                <b>{{ row.employee.name }}</b><br>
+                                <small>₹{{ row.employee.stepend_per_1000 }}/1000 bricks</small>
+                            </td>
+                            <td>{{row.weekly_bricks}}</td>
+                            {% for day in row.days %}
+                            <td>
+                                <input type="number"
+                                    min="0"
+                                    class="form-control form-control-sm text-center"
+                                    style="width: 90px; margin: auto;"
+                                    name="bricks_{{ row.employee.id }}_{{ day.date|date:'Y-m-d' }}"
+                                    value="{{ day.bricks }}">
+                                <small class="text-muted d-block mt-1">₹{{ day.amount|floatformat:0 }}</small>
+                            </td>
+                            {% endfor %}
+
+                            <td><b>₹{{ row.total|floatformat:0 }}</b></td>
+                            <td>₹{{ row.advance|floatformat:0 }}</td>
+                            <td>₹{{ row.saving|floatformat:0 }}</td>
+                            
+                            <td>₹{{ row.loan|floatformat:0 }}</td>
+                            <td>₹{{ row.paid|floatformat:0 }}</td>
+                            <td>
+                                <b class="text-primary">
+                                    ₹{{ row.remaining|floatformat:0 }}
+                                </b>
+                            </td>
+
+                            <td>
+                                <a href="{% url 'kachi_ent_bharai:employee_detail' row.employee.id %}"
+                                class="btn btn-sm btn-primary mb-1">
+                                    تفصیل
+                                </a>
+
+                                <a href="{% url 'kachi_ent_bharai:give_payment' row.employee.id %}"
+                                class="btn btn-sm btn-success w-100">
+                                    Pay
+                                </a>
+                            </td>
+
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        </form>
+
+    </div>
+</div>
+    {% endblock %}

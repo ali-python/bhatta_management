@@ -1,0 +1,37 @@
+        {% extends "base.html" %}
+{% block kachi_ent_bharai %}active{% endblock %}                 
+{% block kachi_ent_dashboard %}active{% endblock %}
+{% block content %}
+
+<div class="content-wrapper p-4" style="padding-left: 25px;">
+
+    <h3>جمع</h3>
+
+    <div class="card p-4 shadow-sm border-info">
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label class="form-label">مزدور</label>
+                {{ form.employee }}
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">رقم (₹)</label>
+                {{ form.amount }}
+            </div>
+                    <br>
+            <button class="btn btn-info">Save </button>
+
+            <a href="{% url 'kachi_ent_bharai:dashboard' %}"
+               class="btn btn-secondary float-right">
+               Cancel
+            </a>
+        </form>
+
+    </div>
+
+</div>
+
+{% endblock %}

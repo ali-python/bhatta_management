@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block brickout %}active{% endblock %}
+{% block brickout_create_out %}active{% endblock %}
+{% block content %}
+{% load static %}
+
+<div class="content-wrapper">
+    <section class="content-header">
+        <ol class="breadcrumb">
+            <li><a href="{% url 'common:index' %}"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">Add Brick Work</li>
+        </ol>
+    </section>
+    <br>
+
+    <section class="content">
+        <div class="row">
+            <div class="col-md-12">
+
+                <div class="box">
+                    <div class="box-header">
+                        <h4 class="text-center">
+                            <b>{% if object %}اپ ڈیٹ{% else %}دَرج کرنا{% endif %} مزدور نکاسی رِیکارڈ</b>
+                        </h4>
+                    </div>
+
+                    <div class="box-body">
+                        <form method="post" autocomplete="off">
+                            {% csrf_token %}
+
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">مزدور <span class="text-danger">*</span></label>
+                                    {{ form.employee }}
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">تاریخ <span class="text-danger">*</span></label>
+                                    {{ form.date }}
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">اِینٹ کی قِسم <span class="text-danger">*</span></label>
+                                    {{ form.brick_type }}
+                                </div>
+                            </div>
+
+                            <div class="row">
+
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">اِینٹوں کی تعداد <span class="text-danger">*</span></label>
+                                    {{ form.quantity }}
+                                </div>
+
+                                <div class="col-md-4 mb-3">
+                                    <label class="form-label">ریٹ <span class="text-danger">*</span></label>
+                                    {{ form.rate }}
+                                </div>
+                            </div>
+                            <br>
+                            <div class="row mt-3">
+                                <div class="col-md-2">
+                                    <button type="submit" class="btn btn-primary form-control">
+                                        Save
+                                    </button>
+                                </div>
+                            </div>
+
+                        </form>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+    </section>
+</div>
+
+{% endblock %}

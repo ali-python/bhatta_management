@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+{% block hourly_employee %}active{% endblock %}
+{% block hourly_employee_dashboard %}active{% endblock %}
+{% block content %}
+{% load static %}
+
+<div class="content-wrapper">
+
+    <section class="content-header">
+        <h3>بھٹہ کیری مزدور</h3>
+    </section>
+
+    <!-- Week Navigation -->
+    <div class="mb-3">
+        <a href="?week={{ prev_week }}" class="btn btn-outline-primary">← Previous Week</a>
+        <a href="?week={{ next_week }}" class="btn btn-outline-primary">Next Week →</a>
+    </div>
+
+    <section class="content">
+
+        <!-- Add Employee -->
+        <div class="card p-3 mb-4 shadow border-primary">
+            <h4>مزدور شامل کریں</h4>
+
+            <form method="post">
+                {% csrf_token %}
+                {% for field in form %}
+                <div class="form-group">
+                    <label>{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.errors %}
+                        <small class="text-danger">{{ field.errors }}</small>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+                <button type="submit" name="add_employee" class="btn btn-primary">
+                     مزدور شامل کریں
+                </button>
+            </form>
+        </div>
+
+        <!-- Hours Form -->
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" name="update_hours" class="btn btn-success mb-3">
+                Save
+            </button>
+
+            <a href="{% url 'hourly:add_advance' %}" class="btn btn-warning mb-3">خرچہ شامل کریں</a>
+            <a href="{% url 'hourly:add_saving' %}" class="btn btn-info mb-3"> جمع</a>
+            <a href="{% url 'hourly:add_loan' %}" class="btn btn-danger">پیشگی شامل کریں</a>
+
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped text-center">
+                    <thead class="table-primary">
+                        <tr>
+                            <th>مزدور</th>
+                            <th>کُل گھنٹے</th> <!-- NEW COLUMN -->
+                            {% for d in week_dates %}
+                                <th>{{ d|date:"D" }}<br>{{ d|date:"d M" }}</th>
+                            {% endfor %}
+                            <th>ٹوٹل (₹)</th>
+                            <th>خرچہ (₹)</th>
+                            <th>پیشگی (₹)</th>
+                            <th>جمع (₹)</th>
+                            <th>باقی (₹)</th>
+                            <th>ادا شُدہ (₹)</th>
+                            <!-- <th>ادائیگی (₹)</th> -->
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for row in table %}
+                        <tr>
+                            <td><b>{{ row.employee.name }}</b><br>
+                                <small>₹{{ row.employee.hourly_rate|floatformat:0 }}/hr</small>
+                            </td>
+                            <td><b>{{ row.total_hours|floatformat:2 }}</b></td> <!-- display total hours -->
+
+                            {% for day in row.days %}
+<td>
+
+    <!-- Urdu Day Name -->
+    <small class="text-primary d-block fw-bold">
+
+        {% if day.date|date:"l" == "Saturday" %}
+            ہفتہ
+        {% elif day.date|date:"l" == "Sunday" %}
+            اتوار
+        {% elif day.date|date:"l" == "Monday" %}
+            پیر
+        {% elif day.date|date:"l" == "Tuesday" %}
+            منگل
+        {% elif day.date|date:"l" == "Wednesday" %}
+            بدھ
+        {% elif day.date|date:"l" == "Thursday" %}
+            جمعرات
+        {% elif day.date|date:"l" == "Friday" %}
+            جمعہ
+        {% endif %}
+
+    </small>
+
+    <div class="d-flex gap-1">
+        <input type="number"
+            name="hours_{{ row.employee.id }}_{{ day.date|date:'Y-m-d' }}_h"
+            class="form-control text-center"
+            min="0"
+            max="24"
+            value="{{ day.hours }}"
+            style="width:60px" />
+
+        <input type="number"
+            name="hours_{{ row.employee.id }}_{{ day.date|date:'Y-m-d' }}_m"
+            class="form-control text-center"
+            min="0"
+            max="59"
+            value="{{ day.minutes }}"
+            style="width:60px" />
+    </div>
+
+    <small class="text-muted d-block">
+        ₹{{ day.amount|floatformat:0 }}
+    </small>
+
+</td>
+{% endfor %}
+
+
+                            <td><b>₹{{ row.total|floatformat:0 }}</b></td>
+                            <td>₹{{ row.advance|floatformat:0 }}</td>
+                            <td>₹{{row.total_loan|floatformat:0}}</td>
+                            <td>₹{{ row.saving|floatformat:0 }}</td>
+                            <td><b>₹{{ row.remaining|floatformat:0 }}</b></td>
+                            <td>₹{{ row.paid|floatformat:0 }}</td>
+                            <!-- <td>{{row.paid}}</td> -->
+                            <td>
+                                <a href="{% url 'hourly:employee_detail' row.employee.id %}"
+                                class="btn btn-sm btn-primary mb-1">تفصیل</a>
+                                <a href="{% url 'hourly:give_payment' row.employee.id %}"
+                                class="btn btn-sm btn-success mb-1">Pay</a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                </table>
+            </div>
+        </form>
+
+    </section>
+</div>
+
+{% endblock %}

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>Customer Dashboard</h3>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Trips</th>
+            <th>Total Trip Amount</th>
+            <th>Paid</th>
+            <th>Balance</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in customer_data %}
+        <tr>
+            <td>{{ row.customer.name }}</td>
+            <td>{{ row.trips_count }}</td>
+            <td>₹{{ row.total_trip_amount }}</td>
+            <td>₹{{ row.total_paid }}</td>
+            <td>₹{{ row.balance }}</td>
+            <td>
+                <a href="{% url 'customer:ledger' row.customer.id %}" class="btn btn-sm btn-primary">Ledger</a>
+                <a href="{% url 'customer:add_trip' %}?customer={{ row.customer.id }}" class="btn btn-sm btn-success">Add Trip</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

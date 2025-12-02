@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block tractor %}active{% endblock %}
+{% block tractor_payment_create %}active{% endblock %}
+
+{% block content %}
+<div class="content-wrapper" style="padding-left: 15px;">
+    <section class="content-header">
+        <h3 class="text-center">{% if object %}اپڈیٹ{% else %}شامل کریں{% endif %} مزدور کی ادائیگی</h3>
+    </section>
+
+    <div class="card shadow p-4">
+
+        {% if form.errors %}
+            <div class="alert alert-danger">
+                <ul>
+                {% for field in form %}
+                    {% for error in field.errors %}
+                        <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                    {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+                </ul>
+            </div>
+        {% endif %}
+
+        <form method="post" autocomplete="off">
+            {% csrf_token %}
+            <div class="row">
+
+                <!-- Employee Field -->
+                <div class="col-md-4 form-group">
+                    <label>مزدور</label>
+                    {% if selected_employee %}
+                        <input type="text" class="form-control" value="{{ selected_employee.name }}" readonly>
+                        <input type="hidden" name="employee" value="{{ selected_employee.id }}">
+                    {% else %}
+                        {{ form.employee}}
+                    {% endif %}
+                </div>
+
+                <!-- Date -->
+                <div class="col-md-4 form-group">
+                    <label>تاریخ</label>
+                    {{ form.date }}
+                </div>
+
+                <!-- Amount -->
+                <div class="col-md-4 form-group">
+                    <label>رقم (₹)</label>
+                    {{ form.amount}}
+                </div>
+
+                <!-- Remarks -->
+            </div>
+
+            <!-- Totals Info -->
+            {% if selected_employee %}
+                <div class="alert alert-info mt-3">
+                    <span style="font-size: 18px;">
+                    <strong>{{ selected_employee.name }}</strong><br>
+                    Total Trip Amount: ₹{{ total_trip_amount|floatformat:0 }}<br>
+                    Total Advance: ₹{{ total_advance|floatformat:0 }}<br>
+                    Total Paid: ₹{{ total_paid|floatformat:0 }}<br>
+                    <hr>
+                    Remaining: <b>₹{{ remaining_amount|floatformat:0 }}</b>
+                    </span>
+                </div>
+            {% endif %}
+                <br>
+            <div class="row mt-2">
+                <div class="col-md-2 form-group">
+                    <button type="submit" class="btn btn-primary form-control">Save</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block tractor %}active{% endblock %}                 
+{% block tractor_trip_list %}active{% endblock %}
+{% block content %}
+<div class="content-wrapper">
+    <section class="content-header">
+        <ol class="breadcrumb">
+            <li><a href="{% url 'common:index' %}"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li class="active">ٹریکٹر چکر</li>
+        </ol>
+    </section>
+    <br>
+    <section class="content">
+        <div class="box">
+            <div class="box-header text-center">
+                <h4><b>ٹریکٹر چکر</b></h4>
+            </div>
+            <div class="box-body">
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>تاریخ</th>
+                            <th>ٹریکٹر</th>
+                            <th>ڈرائیور</th>
+                            <th>گاہک</th>
+                            <th>اینٹیں اٹھائی گئیں</th>
+                            <th>چکر کی رقم (₹)</th>
+                            <th>عملیات</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for trip in object_list %}
+                        <tr>
+                            <td>{{ trip.date }}</td>
+                            <td>{{ trip.tractor.name }}</td>
+                            <td>{{ trip.driver.name }}</td>
+                            <td>{{ trip.customer.name}}</td>
+                            <td>{{ trip.bricks_carried }}</td>
+                            <td>₹{{ trip.trip_amount|floatformat:2 }}</td>
+                            <td>
+                                <a href="{% url 'tractor:trip_update' trip.id %}" class="btn btn-xs btn-info">اپڈیٹ</a>
+                                <a href="{% url 'tractor:invoice_detail' trip.id %}" class="btn btn-xs btn-primary" target="_blank">انویس</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="6" class="text-center">No trips found</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

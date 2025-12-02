@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+{% block tractor %}active{% endblock %}
+{% block ledger %}active{% endblock %}
+{% block content %}
+{% load static %}
+
+<div class="content-wrapper">
+    <section class="content-header">
+        <ol class="breadcrumb">
+            <li><a href="{% url 'common:index' %}"><i class="fa fa-dashboard"></i> Home</a></li>
+            <li><a href="{% url 'tractor:employee_list' %}">مزدور</a></li>
+            <li class="active">{{ employee.name }} کھاتہ</li>
+        </ol>
+    </section>
+    <br>
+
+    <section class="content">
+        <div class="box">
+            <div class="box-header text-center">
+                <h3><b>{{ employee.name }}</b> — کھاتہ</h3>
+            </div>
+            <div class="box-body">
+
+                <!-- Summary -->
+                <h4><b>خلاصہ</b></h4>
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>ٹوٹل چکر رقم (₹)</th>
+                            <th>ٹوٹل خرچہ (₹)</th>
+                            <th>ٹوٹل پیشگی</th>
+                            <th>ٹوٹل جمع</th>
+                            <th>ٹوٹل ادایگی (₹)</th>
+                            <th>بقایا رقم (₹)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>₹{{ total_trip_amount|floatformat:0 }}</td>
+                            <td>₹{{ total_advance|floatformat:0 }}</td>
+                            <td>₹{{total_loan|floatformat:0 }}</td>
+                            <td>₹{{total_saving|floatformat:0 }}</td>
+                            <td>₹{{ total_paid|floatformat:0 }}</td>
+                            <td><b>₹{{ balance|floatformat:0 }}</b></td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <hr>
+
+                <!-- Trip Records -->
+                <h4><b>ہفتہ وار تفصیلات</b></h4>
+
+                {% for week_start, trips in weekly_trips %}
+                <div class="box box-primary">
+                    <div class="box-header">
+                        <h4>
+                            <b>ہفتہ:</b> {{ week_start }} → {{ week_start|add:"6 days" }}
+                        </h4>
+                    </div>
+                    <div class="box-body">
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>تاریخ</th>
+                                    <th>ٹریکٹر</th>
+                                    <th>اینٹ</th>
+                                    <th>حصہ (₹)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for trip in trips %}
+                                <tr>
+                                    <td>{{ trip.date }}</td>
+                                    <td>{{ trip.tractor.name }}</td>
+                                    <td>{{ trip.bricks_carried }}</td>
+                                    <td>
+                                        {% if trip.driver == employee %}
+                                            ₹{{ trip.driver_share|floatformat:0 }}
+                                        {% else %}
+                                            ₹{{ trip.conductor_share|floatformat:0 }}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                {% empty %}
+                <p>No trips found.</p>
+                {% endfor %}
+
+                <!-- Pagination -->
+                <div class="text-center">
+                    {% if weekly_trips.has_other_pages %}
+                        <ul class="pagination">
+
+                            {% if weekly_trips.has_previous %}
+                                <li><a href="?page={{ weekly_trips.previous_page_number }}">&laquo; Prev</a></li>
+                            {% else %}
+                                <li class="disabled"><span>&laquo; Prev</span></li>
+                            {% endif %}
+
+                            {% for num in weekly_trips.paginator.page_range %}
+                                {% if weekly_trips.number == num %}
+                                    <li class="active"><span>{{ num }}</span></li>
+                                {% else %}
+                                    <li><a href="?page={{ num }}">{{ num }}</a></li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if weekly_trips.has_next %}
+                                <li><a href="?page={{ weekly_trips.next_page_number }}">Next &raquo;</a></li>
+                            {% else %}
+                                <li class="disabled"><span>Next &raquo;</span></li>
+                            {% endif %}
+
+                        </ul>
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+    </section>
+</div>
+
+{% endblock %}

@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% block worker %}active{% endblock %}
+{% block content %}
+{% load static %}
+
+<div class="content-wrapper">
+    <section class="content-header">
+        <ol class="breadcrumb">
+            <li><a href="{% url 'worker:home' %}"><i class="fa fa-dashboard"></i> Home</a></li>
+        </ol>
+    </section>
+    <br>
+    <section class="content">
+
+        <!-- Quick Links -->
+        <div class="box">
+            <div class="box-header">
+                <h4 class="text-center"><b></b></h4>
+            </div>
+            <div class="box-body text-center">
+                <a href="{% url 'worker:add_bhatta' %}" class="btn btn-primary">بھٹہ شامل کریں</a>
+                <a href="{% url 'worker:add_worker' %}" class="btn btn-success">مستری شامل کریں</a>
+                <a href="{% url 'worker:add_weekly_report' %}" class="btn btn-warning">ہفتہ وار رپورٹ شامل کریں</a>
+                <!-- <a href="{% url 'worker:yearly_settlement' %}" class="btn btn-info">Yearly Settlement</a> -->
+                <a href="{% url 'worker:worker_ledger' %}" class="btn btn-danger">مستری کھاتہ</a>
+            </div>
+        </div>
+
+        <!-- Bhattas List -->
+        <div class="box">
+            <div class="box-header">
+                <h4 class="text-center"><b>بھٹہ</b></h4>
+            </div>
+            <div class="box-body">
+                <ul class="list-group">
+                    {% for bhatta in bhattas %}
+                        <li class="list-group-item" style="font-size: 18px;"><b>{{ bhatta.name }}</b></li>
+                    {% empty %}
+                        <li class="list-group-item">No bhattas</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Workers List -->
+        <!-- inside your existing home.html where workers are listed -->
+<div class="box">
+    <div class="box-header">
+        <h4 class="text-center"><b>مستری</b></h4>
+    </div>
+    <div class="box-body">
+        <ul class="list-group">
+            {% for worker in workers %}
+                <li class="list-group-item">
+                    <strong style="font-size: 18px;">{{ worker.name }}</strong> - {{ worker.phone }}
+                    <br>
+                    
+                        Bhatta(s):
+                        {% if worker.bhattas.all %}
+                            {% for b in worker.bhattas.all %}
+                                {{ b.name }}{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <em>No bhatta assigned</em>
+                        {% endif %}
+                    
+
+                    <div class="pull-right">
+                        <a href="{% url 'worker:detail' worker.id %}" class="btn btn-xs btn-info">کھاتہ</a>
+                        <a href="{% url 'worker:add_advance' worker.id %}" class="btn btn-xs btn-warning">خرچہ شامل کریں</a>
+                        <a href="{% url 'worker:add_loan' worker.id %}" class="btn btn-xs btn-danger">پیشگی شامل کریں</a>
+                    </div>
+                </li>
+            {% empty %}
+                <li class="list-group-item">No workers</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+
+    </section>
+</div>
+
+{% endblock %}

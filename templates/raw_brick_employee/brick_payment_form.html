@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="content-wrapper p-4" style="padding-left: 25px;">
+
+    <h3>Pay {{ employee.name }}</h3>
+
+    <div class="card p-4 shadow-sm border-success">
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label class="form-label">رقم (₹)</label>
+                {{ form.amount }}
+            </div>
+                    <br>
+            <button class="btn btn-success">Submit Payment</button>
+
+            <a href="{% url 'raw_bricks_employee:employee_detail' employee.id %}"
+               class="btn btn-secondary float-right">
+               Cancel
+            </a>
+
+        </form>
+    </div>
+
+</div>
+
+{% endblock %}

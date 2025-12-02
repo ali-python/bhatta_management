@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+{% block kachi_ent_bharai %}active{% endblock %}                 
+{% block kachi_ent_dashboard %}active{% endblock %}
+{% block content %}
+
+<div class="content-wrapper">
+
+    <!-- Page Header -->
+    <section class="content-header">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h3>{{ employee.name }} — ہفتہ وار تفصیلات</h3>
+            <a href="{% url 'kachi_ent_bharai:dashboard' %}" class="btn btn-secondary">
+                ← Back to Dashboard
+            </a>
+        </div>
+
+        <!-- Week Navigation -->
+        <div class="mb-3">
+            <a href="?week={{ prev_week }}" class="btn btn-outline-primary">← Previous Week</a>
+            <a href="?week={{ next_week }}" class="btn btn-outline-primary">Next Week →</a>
+        </div>
+    </section>
+
+    <section class="content">
+
+        <!-- Summary Cards -->
+        <div class="row mb-4">
+            <div class="col-md-2">
+                <div class="card p-3 shadow-sm border-primary">
+                    <h6 class="text-muted">  کُل ہفتہ </h6>
+                    <h4 class="mb-0">₹{{ summary.total|floatformat:0 }}</h4>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card p-3 shadow-sm border-warning">
+                    <h6 class="text-muted">ایڈوانس</h6>
+                    <h4 class="mb-0">₹{{ summary.advance|floatformat:0 }}</h4>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card p-3 shadow-sm border-info">
+                    <h6 class="text-muted">جمع</h6>
+                    <h4 class="mb-0">₹{{ summary.saving|floatformat:0 }}</h4>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card p-3 shadow-sm border-success">
+                    <h6 class="text-muted">ادائیگی</h6>
+                    <h4 class="mb-0">₹{{ summary.paid|floatformat:0 }}</h4>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="card p-3 shadow-sm border-success">
+                    <h6 class="text-muted">بقایا پیشگی</h6>
+                    <h4 class="mb-0">₹{{ summary.remaing_loan|floatformat:0 }}</h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Remaining Balance -->
+        <div class="card mb-4 shadow-sm border-dark p-3">
+            <h3 class="mb-0">باقی بیلنس: <span class="text-primary">₹{{ summary.remaining|floatformat:0 }}</span></h3>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="d-flex gap-2 mb-4">
+            <a href="{% url 'kachi_ent_bharai:give_payment' employee.id %}" class="btn btn-success">مزدور کو ادائیگی کریں</a>
+            <a href="{% url 'kachi_ent_bharai:add_advance' %}" class="btn btn-warning">خرچہ شامل کریں</a>
+            <a href="{% url 'kachi_ent_bharai:add_saving' %}" class="btn btn-info">جمع شامل کریں</a>
+        </div>
+
+        <!-- Daily Bricks History -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">روزانہ کام کی تفصیلات</h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped mb-0 text-center">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>تاریخ</th>
+                            <th>اینٹیں</th>
+                            <th>رقم (₹)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for day in daily %}
+                        <tr>
+                            <td>{{ day.date|date:"D, d M Y" }}</td>
+                            <td>{{ day.bricks }}</td>
+                            <td>₹{{ day.amount|floatformat:0 }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" class="text-center text-muted">No records found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Payments History -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">ادائیگی کی تاریخ</h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped mb-0 text-center">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>تاریخ</th>
+                            <th>رقم (₹)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in payments %}
+                        <tr>
+                            <td>{{ p.date|date:"D, d M Y" }}</td>
+                            <td>₹{{ p.amount|floatformat:0 }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="2" class="text-center text-muted">No payments yet.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Advance History -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0"> خرچہ کی تاریخ  </h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped mb-0 text-center">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>تاریخ</th>
+                            <th>رقم (₹)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for a in advance %}
+                        <tr>
+                            <td>{{ a.date|date:"D, d M Y" }}</td>
+                            <td>₹{{ a.amount|floatformat:0 }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="2" class="text-center text-muted">No advance taken.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Saving History -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">جمع کی تاریخ</h5>
+                <b><h4 style="color:green">ٹوٹل   : {{summary.saving}}</h4></b>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered table-striped mb-0 text-center">
+                    <thead class="thead-light">
+                        <tr>
+                            <th>تاریخ</th>
+                            <th>رقم (₹)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in saving %}
+                        <tr>
+                            <td>{{ s.date|date:"D, d M Y" }}</td>
+                            <td>₹{{ s.amount|floatformat:0 }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="2" class="text-center text-muted">No savings added.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Loan History -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-danger text-white">
+        <h5 class="mb-0">  پیشگی کی تاریخ</h5>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Date</th>
+                    <th>Amount (₹)</th>
+                    <th>Note</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for l in loans %}
+                <tr>
+                    <td>{{ l.date|date:"d M, Y" }}</td>
+                    <td>₹{{ l.amount|floatformat:0 }}</td>
+                    <td>{{ l.note }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="text-center text-muted">
+                        No loans taken.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+    </section>
+
+    
+
+</div>
+
+{% endblock %}
