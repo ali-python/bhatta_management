@@ -51,4 +51,5 @@ urlpatterns = [
     path('customer/<int:customer_pk>/advance/', views.create_customer_advance, name='create_customer_advance'),
     path("add-loan/", views.add_loan, name="add_loan"),
     path("add-saving/", views.add_saving, name="add_saving"),
+    path("delete/payment/<int:payment_id>/", views.tractor_payment_delete, name="delete_payment"),
     ]

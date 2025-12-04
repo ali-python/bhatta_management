@@ -103,6 +103,18 @@
 
                     </ul>
                 </li>
+                <li class="header">بھٹہ کیری مزدور</li>
+                <li class="treeview {% block hourly_employee %}{% endblock %}">
+                    <a href="#">
+                        <i class="fa fa-money"></i> <span>بھٹہ کیری مزدور</span>
+                        <span class="pull-right-container">
+                            <i class="fa fa-angle-left pull-right"></i>
+                        </span>
+                    </a>
+                    <ul class="treeview-menu">
+                        <li class="{% block hourly_employee_dashboard %}{% endblock %}"><a href="{% url 'hourly:employees_dashboard' %}"><i class="fa fa-circle-o"></i> <span>بھٹہ کیری مزدور</span></a></li>
+                    </ul>
+                </li>
                 <li class="treeview {% block customer %}{% endblock %}">
                     <a href="#">
                         <i class="fa fa-user"></i> <span>گاہک</span>
@@ -139,18 +151,7 @@
 
                 </li>
                 
-                <li class="header">بھٹہ کیری مزدور</li>
-                <li class="treeview {% block hourly_employee %}{% endblock %}">
-                    <a href="#">
-                        <i class="fa fa-money"></i> <span>بھٹہ کیری مزدور</span>
-                        <span class="pull-right-container">
-                            <i class="fa fa-angle-left pull-right"></i>
-                        </span>
-                    </a>
-                    <ul class="treeview-menu">
-                        <li class="{% block hourly_employee_dashboard %}{% endblock %}"><a href="{% url 'hourly:employees_dashboard' %}"><i class="fa fa-circle-o"></i> <span>بھٹہ کیری مزدور</span></a></li>
-                    </ul>
-                </li>
+                
                 <li class="header">کالبی</li>
                 <li class="treeview {% block raw_bricks_employee %}{% endblock %}">
                     <a href="#">

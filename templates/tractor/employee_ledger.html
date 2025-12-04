@@ -64,6 +64,7 @@
                                 <tr>
                                     <th>تاریخ</th>
                                     <th>ٹریکٹر</th>
+                                    <th>گاہک</th>
                                     <th>اینٹ</th>
                                     <th>حصہ (₹)</th>
                                 </tr>
@@ -73,6 +74,7 @@
                                 <tr>
                                     <td>{{ trip.date }}</td>
                                     <td>{{ trip.tractor.name }}</td>
+                                    <td>{{ trip.customer.name }}</td>
                                     <td>{{ trip.bricks_carried }}</td>
                                     <td>
                                         {% if trip.driver == employee %}

@@ -2,22 +2,22 @@
 {% block content %}
 
 <div class="content-wrapper p-4" style="padding-left: 15px;">
-    <h3>Confirm Payment</h3>
+    <h3> رقم</h3>
 
     <div class="card p-4">
         <h3>{{ employee.name }}</h3>
-        <p style="font-size: 20px;">Remaining Payable: <b>₹{{ remaining }}</b></p>
+        <p style="font-size: 20px;"> بقیہ رقم : <b>₹{{ remaining|floatformat:0 }}</b></p>
 
         <form method="post">
             {% csrf_token %}
             <div class="mb-3">
-                <label for="amount" class="form-label">Payment Amount (₹)</label>
+                <label for="amount" class="form-label">رقم کی ادائیگی (₹)</label>
                 <input type="number" step="0.01" min="0" max="{{ remaining }}" 
                        class="form-control" id="amount" name="amount" 
-                       placeholder="Enter payment amount" required>
+                       placeholder="رقم کی ادائیگی درج کریں" required>
             </div>
             <br>
-            <button type="submit" class="btn btn-success">Confirm Payment</button>
+            <button type="submit" class="btn btn-success">ادائیگی کی تصدیق کریں</button>
         </form>
     </div>
 </div>

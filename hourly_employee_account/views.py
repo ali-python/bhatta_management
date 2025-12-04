@@ -11,12 +11,11 @@ from decimal import Decimal
 from decimal import Decimal, ROUND_HALF_UP
 
 def hourly_dashboard(request):
-    # Week navigation
     week_offset = int(request.GET.get("week", 0))
     today = timezone.now().date() + timedelta(days=7 * week_offset)
 
-    # --- Week starts on SATURDAY ---
-    weekday = today.weekday()            # Mon=0 … Sun=6
+    # Week starts on Saturday
+    weekday = today.weekday()
     days_since_saturday = (weekday - 5) % 7
     week_start = today - timedelta(days=days_since_saturday)
     week_dates = [week_start + timedelta(days=i) for i in range(7)]
@@ -26,14 +25,14 @@ def hourly_dashboard(request):
 
     employees = HourlyEmployee.objects.all().order_by("name")
 
-    # --- Add new employee ---
+    # Add Employee
     if request.method == "POST" and "add_employee" in request.POST:
         form = HourlyEmployeeForm(request.POST)
         if form.is_valid():
             form.save()
             return redirect("hourly:employees_dashboard")
 
-    # --- Update hours (hours + minutes) ---
+    # Update Hours
     if request.method == "POST" and "update_hours" in request.POST:
         for key, value in request.POST.items():
             if "_h" in key and key.startswith("hours_"):
@@ -45,10 +44,8 @@ def hourly_dashboard(request):
                 minutes_key = f"hours_{emp_id}_{date_str}_m"
                 minutes = Decimal(request.POST.get(minutes_key, 0) or 0)
 
-                # Convert minutes to decimal hours
+                # convert mins → decimal
                 total_hours = hours + (minutes / Decimal(60))
-
-                # Ensure very accurate rounding
                 total_hours = total_hours.quantize(Decimal("0.000001"), rounding=ROUND_HALF_UP)
 
                 entry, created = HourEntry.objects.get_or_create(
@@ -60,23 +57,19 @@ def hourly_dashboard(request):
 
         return redirect(f"/hourly/employee/?week={week_offset}")
 
-    # --- Build table data ---
+    # Build table
     table = []
 
     for emp in employees:
-
-        # FILTER weekly records
         week_hours = HourEntry.objects.filter(employee=emp, date__in=week_dates)
         week_payments = HourlyPayment.objects.filter(employee=emp, date__in=week_dates)
         week_advance_taken = HourlyAdvance.objects.filter(employee=emp, date__in=week_dates)
         week_advance_deducted = HourlyAdvanceDeduction.objects.filter(employee=emp, date__in=week_dates)
 
-        # SUM only weekly amounts
         paid = sum(p.amount for p in week_payments)
         advance_taken = sum(a.amount for a in week_advance_taken)
         advance_deducted = sum(d.amount for d in week_advance_deducted)
 
-        # Only savings & loan are lifetime, not weekly
         total_loan = sum(l.amount for l in HourlyLoan.objects.filter(employee=emp))
         saving = sum(s.amount for s in HourlySaving.objects.filter(employee=emp))
 
@@ -87,28 +80,22 @@ def hourly_dashboard(request):
             "days": [],
             "total": 0,
             "total_hours": 0,
-
-            # Weekly values
             "advance_taken": advance_taken,
             "advance_deducted": advance_deducted,
             "advance": advance_taken - advance_deducted,
-
-            # Lifetime values
             "total_loan": total_loan,
             "saving": saving,
-
-            # Weekly payment
             "paid": paid,
         }
 
-        # --- DAILY HOURS ---
         for d in week_dates:
             entry = week_hours.filter(date=d).first()
             hours_decimal = entry.hours if entry else Decimal("0")
             hours_decimal = hours_decimal.quantize(Decimal("0.000001"), rounding=ROUND_HALF_UP)
 
             whole_hours = int(hours_decimal)
-            minutes = int(((hours_decimal - Decimal(whole_hours)) * 60).quantize(Decimal("1"), rounding=ROUND_HALF_UP))
+            minutes = int(((hours_decimal - Decimal(whole_hours)) * 60)
+                          .quantize(Decimal("1"), rounding=ROUND_HALF_UP))
 
             if minutes == 60:
                 whole_hours += 1
@@ -126,14 +113,23 @@ def hourly_dashboard(request):
 
             row["total"] += amount
 
-        row["total_hours"] = total_hours
+        # ---- WEEK TOTAL HOURS (H.MM FORMAT) ----
+        total_hours = total_hours.quantize(Decimal("0.000001"), rounding=ROUND_HALF_UP)
 
-        # --- Correct Weekly Remaining ---
-        row["remaining"] = row["total"] - paid - advance_deducted - saving
+        th_whole = int(total_hours)
+        th_min = int(((total_hours - Decimal(th_whole)) * 60)
+                      .quantize(Decimal("1"), rounding=ROUND_HALF_UP))
+
+        if th_min == 60:
+            th_whole += 1
+            th_min = 0
+
+        row["total_hours_display"] = f"{th_whole}.{th_min:02d}"
+        row["total_hours"] = total_hours  # for math
+
+        row["remaining"] = row["total"] - paid - advance_taken - saving
 
         table.append(row)
-
-
 
     return render(request, "hourly_employee/hourly_dashboard.html", {
         "week_dates": week_dates,
@@ -143,6 +139,7 @@ def hourly_dashboard(request):
         "next_week": next_week,
         "week_offset": week_offset,
     })
+
 
 
 
