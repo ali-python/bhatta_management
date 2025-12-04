@@ -1,0 +1,16 @@
+<h2>Delete Weekly Report</h2>
+
+<p>Are you sure you want to delete this weekly report?</p>
+
+<ul>
+    <li><strong>Worker:</strong> {{ report.worker.name }}</li>
+    <li><strong>Bhatta:</strong> {{ report.bhatta.name }}</li>
+    <li><strong>Week:</strong> {{ report.week_start }} → {{ report.week_end }}</li>
+    <li><strong>Bricks worked:</strong> {{ report.bricks_worked }}</li>
+</ul>
+
+<form method="POST">
+    {% csrf_token %}
+    <button type="submit">Yes, Delete</button>
+    <a href="{% url 'worker:worker_ledger' %}">Cancel</a>
+</form>

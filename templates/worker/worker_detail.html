@@ -64,7 +64,6 @@
         </div>
                 </div>
                 <a href="{% url 'worker:yearly_settlement' worker.id bhatta.id %}" class="btn btn-info btn-sm"> سالانہ حساب</a>
-
                 <div class="box-body">
                     <table class="table table-bordered">
                         <thead>
@@ -72,6 +71,7 @@
                                 <th>ہفتہ شروع (ہفتہ)</th>
                                 <th>ہفتہ ختم (جمعہ)</th>
                                 <th>اِینٹیں</th>
+                                <th>action</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -81,7 +81,10 @@
                                     <td>{{ w.week_start }}</td>
                                     <td>{{ w.week_end }}</td>
                                     <td>{{ w.bricks_worked }}</td>
-                                </tr>
+                                    <td>
+                                    <a href="{% url 'worker:weekly_report_delete' w.worker.id w.id %}" class="btn btn-danger btn-sm">Delete</a>
+                                    </td>
+                                </tr>       
                                 {% endfor %}
                             {% else %}
                                 <tr><td colspan="3" class="text-center">No weekly reports for this bhatta</td></tr>

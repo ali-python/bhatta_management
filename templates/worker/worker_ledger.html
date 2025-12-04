@@ -45,7 +45,8 @@
                                 <td>{{ s.total_advance }}</td>
                                 <td>{{ s.total_loan_deducted }}</td>
                                 <td>{{ s.amount_to_pay }}</td>
-                                <td><a href="{% url 'worker:detail' s.worker.id %}" class="btn btn-xs btn-info">کھاتہ</a></td>
+                                <td><a href="{% url 'worker:detail' s.worker.id %}" class="btn btn-xs btn-info">کھاتہ</a>
+                                </td>
                             </tr>
                             {% endfor %}
                         </tbody>

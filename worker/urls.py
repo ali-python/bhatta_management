@@ -20,5 +20,11 @@ urlpatterns = [
     path('add_loan/', views.add_loan, name='add_loan'),
     path('add_loan/<int:worker_id>/', views.add_loan, name='add_loan'),
 
+    path('<int:worker_id>/weekly-report/<int:report_id>/delete/', 
+     views.weekly_report_delete, 
+     name='weekly_report_delete'),
+
+
+
 ]
 

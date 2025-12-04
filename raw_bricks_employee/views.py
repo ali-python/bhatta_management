@@ -239,7 +239,6 @@ def give_brick_payment(request, emp_id):
     total_advance = BrickAdvance.objects.filter(employee=emp).aggregate(total=models.Sum('amount'))['total'] or Decimal('0.0')
     total_deducted = BrickAdvanceDeduction.objects.filter(employee=emp).aggregate(total=models.Sum('amount'))['total'] or Decimal('0.0')
     remaining_advance = total_advance - total_deducted
-
     if request.method == "POST":
         form = BrickPaymentForm(request.POST)
         if form.is_valid():
@@ -251,12 +250,12 @@ def give_brick_payment(request, emp_id):
             if remaining_advance > 0:
                 amount_due = pay.amount
                 deduct_amount = min(amount_due, remaining_advance)
-
+                print(deduct_amount)
                 if deduct_amount > 0:
                     BrickAdvanceDeduction.objects.create(
                         employee=emp,
                         payment=pay,
-                        amount=deduct_amount
+                        amount=remaining_advance
                     )
 
             return redirect("raw_bricks_employee:employee_detail", emp_id)

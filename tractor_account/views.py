@@ -886,3 +886,19 @@ def add_saving(request):
     return render(request, "tractor/add_saving.html", {
         "form": TractorSavingForm()
     })
+
+
+from django.shortcuts import get_object_or_404, redirect, render
+
+def tractor_payment_delete(request, payment_id):
+    payment = get_object_or_404(CustomerPayment, id=payment_id)
+
+    if request.method == "POST":
+        customer_pk = payment.customer.id  # Save before deleting
+        payment.delete()
+        return redirect('tractor:customer_ledger', customer_id=customer_pk)
+
+    return render(request, 'tractor/tractor_delete_payment.html', {
+        'payment': payment,
+        'customer': payment.customer
+    })
