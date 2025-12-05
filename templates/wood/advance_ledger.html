@@ -10,7 +10,7 @@
         <ol class="breadcrumb">
             <li><a href="{% url 'wood_scrapper:wood_dashboard' %}"><i class="fa fa-dashboard"></i> Wood Scraper</a></li>
             <li><a href="{% url 'wood_scrapper:scraper_list' %}">لکڑی بورو</a></li>
-            <li class="active">پیشگی کا کھاتہ</li>
+            <li class="active">ایڈوانس کا کھاتہ</li>
         </ol>
     </section>
 <br><br>
@@ -19,13 +19,14 @@
         <!-- Ledger Summary -->
         <div class="box">
             <div class="box-header">
-                <h3 class="text-center"><b>کھاتہ – پیشگی #{{ advance.id }}</b></h3>
-                <h4 class="text-center">Wood Scraper: {{ advance.wood_scraper.name }}</h4>
+                <h3 class="text-center"><b>کھاتہ – ایڈوانس #{{ advance.id }}</b></h3>
+                <h4 class="text-center">بورو: {{ advance.wood_scraper.name }}</h4>
             </div>
 
             <div class="box-body">
                 <p><b>کل رقم:</b> {{ advance.total_amount }}</p>
                 <p><b>ٹوٹل بوری:</b> {{ advance.total_parcels }}</p>
+                <p><b>فی بوری ریٹ:</b> {{ advance.parcel_rate }}</p>
                 <p><b>وصول شُدہ:</b> {{ advance.received_parcels }}</p>
                 <p><b>باقی:</b> {{ advance.pending_parcels }}</p>
 
