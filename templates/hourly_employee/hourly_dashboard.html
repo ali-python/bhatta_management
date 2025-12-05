@@ -60,12 +60,12 @@
                             {% for d in week_dates %}
                                 <th>{{ d|date:"D" }}<br>{{ d|date:"d M" }}</th>
                             {% endfor %}
-                            <th>ٹوٹل (₹)</th>
+                            <th>ٹوٹل رقم </th>
                             <th>خرچہ (₹)</th>
                             <th>پیشگی (₹)</th>
                             <th>جمع (₹)</th>
-                            <th>باقی (₹)</th>
                             <th>ادا شُدہ (₹)</th>
+                            <th>باقی (₹)</th>
                             <!-- <th>ادائیگی (₹)</th> -->
                             <th>Actions</th>
                         </tr>
@@ -133,8 +133,9 @@
                             <td>₹{{ row.advance|floatformat:0 }}</td>
                             <td>₹{{row.total_loan|floatformat:0}}</td>
                             <td>₹{{ row.saving|floatformat:0 }}</td>
-                            <td><b>₹{{ row.remaining|floatformat:0 }}</b></td>
                             <td>₹{{ row.paid|floatformat:0 }}</td>
+                            <td><b>₹{{ row.remaining|floatformat:0 }}</b></td>
+
                             <!-- <td>{{row.paid}}</td> -->
                             <td>
                                 <a href="{% url 'hourly:employee_detail' row.employee.id %}"
