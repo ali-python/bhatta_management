@@ -7,20 +7,20 @@
     <section class="content-header">
         <ol class="breadcrumb">
             <li><a href="{% url 'worker:worker_ledger' %}"><i class="fa fa-dashboard"></i> Home</a></li>
-            <li class="active">Add Loan</li>
+            <li class="active">پیشگی</li>
         </ol>
     </section>
     <br>
     <section class="content">
         <div class="box">
             <div class="box-header">
-                <h4 class="text-center"><b>Add Loan</b></h4>
+                <h4 class="text-center"><b>پیشگی شامل کریں</b></h4>
             </div>
             <div class="box-body">
                 <form method="post">{% csrf_token %}
                     <div class="row">
                         <div class="col-md-4 form-group">
-                            <label>Worker <span style="color:red">*</span></label>
+                            <label>مستری <span style="color:red">*</span></label>
                             <select name="worker" class="form-control" required>
                                 {% for w in workers %}
                                     <option value="{{ w.id }}" {% if initial_worker and initial_worker.id == w.id %}selected{% endif %}>{{ w.name }}</option>
@@ -28,16 +28,16 @@
                             </select>
                         </div>
                         <div class="col-md-4 form-group">
-                            <label>Date</label>
+                            <label>تاریخ</label>
                             <input type="date" name="date" class="form-control" value="{{ today|default:None }}">
                         </div>
                         <div class="col-md-4 form-group">
-                            <label>Amount</label>
-                            <input type="number" step="0.01" name="amount" class="form-control" required>
+                            <label>رقم</label>
+                            <input type="number" step="0.01" name="رقم" class="form-control" required>
                         </div>
                         <div class="col-md-4 form-group">
-                            <label>Description</label>
-                            <input type="text" name="description" class="form-control" >
+                            <label>تفصیل</label>
+                            <input type="text" name="تفصیل" class="form-control" >
                         </div>
                     </div>
 

@@ -251,9 +251,13 @@ def employee_ledger(request, pk):
     # BALANCE LOGIC ---------------------------------------------------------
     if total_paid == 0 and total_deducted == 0:
         balance = total_amount - total_advance
+        print(balance)
+        print("__________________________________________________________")
     else:
-        balance = total_amount - (total_paid + total_deducted) - total_saving
+        balance = total_amount - total_paid - total_advance - total_saving
 
+        print(balance)
+        print("____________________________________DD_____________________________________")
     # WEEK-WISE GROUPING ----------------------------------------------------
     # WEEK-WISE GROUPING (Saturday → Friday) -------------------------------------
     week_data = {}
