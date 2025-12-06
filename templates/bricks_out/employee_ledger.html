@@ -25,11 +25,25 @@
         margin-bottom: 10px;
         color: #3f51b5;
     }
+    .pagination li {
+        display: inline-block;
+        margin: 0 2px;
+    }
+    .pagination li.active a {
+        font-weight: bold;
+        color: #fff;
+        background: #3c8dbc;
+        border-radius: 3px;
+        padding: 3px 8px;
+        text-decoration: none;
+    }
+    .pagination li a {
+        text-decoration: none;
+        padding: 3px 8px;
+    }
 </style>
 
 <div class="content-wrapper">
-
-```
 
 <section class="content-header">
     <ol class="breadcrumb">
@@ -39,8 +53,8 @@
     </ol>
 </section>
 <br><br>
-<section class="content">
 
+<section class="content">
     <div class="box">
 
         <div class="box-header text-center">
@@ -49,13 +63,8 @@
         </div>
 
         <div class="text-center" style="margin-top:10px;">
-            <a href="{% url 'payment:payment_add' %}?employee={{ employee.id }}" class="btn btn-success">
-                + Make Payment
-            </a>
-            <a href="{% url 'bricks_out:add_saving' %}?employee={{ employee.id }}" class="btn btn-success">
-                + Saving
-            </a>
-            
+            <a href="{% url 'payment:payment_add' %}?employee={{ employee.id }}" class="btn btn-success">+ Make Payment</a>
+            <a href="{% url 'bricks_out:add_saving' %}?employee={{ employee.id }}" class="btn btn-success">+ Saving</a>
         </div>
 
         <div class="box-body">
@@ -67,7 +76,6 @@
                     <tr>
                         <th>کُل اینٹیں</th>
                         <th>کمائی (₹)</th>
-                        <!-- <th>Total Advance Employee Taken (₹)</th> -->
                         <th>کُل کٹوتی (₹)</th>
                         <th>کُل خرچہ (₹)</th>
                         <th>پیشگی</th>
@@ -86,7 +94,6 @@
                             <td style="color:rgb(47, 148, 0);">₹{{ total_saving|floatformat:0 }}</td>
                             <td style="color:blue;">₹0</td>
                             <td><b style="color:green;">₹0</b></td>
-
                         {% else %}
                             <!-- FIRST WEEK → show full summary -->
                             <td>{{ total_bricks }}</td>
@@ -99,7 +106,6 @@
                             <td><b style="color:green;">₹{{ balance|floatformat:0 }}</b></td>
                         {% endif %}
                     </tr>
-
                 </table>
             </div>
 
@@ -111,10 +117,11 @@
             <div class="week-box">
                 <div class="week-title">
                     Week {{ week.week_number }}  
-                    <small>({{ week.start_date }} → {{ week.end_date }})</small>
+                    <small>({{ week.week_start }} → {{ week.week_end }})</small>
                 </div>
                 <h4 style="color:green;"><b>کُل اینٹیں:</b> {{ week.week_bricks }}</h4>
 
+                {% if week.works %}
                 <table class="table table-bordered table-striped">
                     <thead>
                         <tr>
@@ -126,7 +133,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        {% for w in week.records %}
+                        {% for w in week.works %}
                         <tr>
                             <td>{{ w.date }}</td>
                             <td>{{ w.quantity }}</td>
@@ -137,13 +144,14 @@
                         {% endfor %}
                         <tr style="background:#eef2ff;">
                             <td colspan="3"><b>Weekly Total</b></td>
-                            <td><b>₹{{ week.week_total|floatformat:0 }}</b></td>
+                            <td colspan="2"><b>₹{{ week.week_total|floatformat:0 }}</b></td>
                         </tr>
                     </tbody>
                 </table>
+                {% else %}
+                <p>No work done this week.</p>
+                {% endif %}
             </div>
-            {% empty %}
-            <p class="text-center">No brick work found.</p>
             {% endfor %}
 
             {% if week_data.paginator.num_pages > 1 %}
@@ -183,7 +191,6 @@
                     {% endfor %}
                 </tbody>
             </table>
-
             {% if advances.paginator.num_pages > 1 %}
             <div class="text-center">
                 <ul class="pagination">
@@ -222,7 +229,6 @@
                     {% endfor %}
                 </tbody>
             </table>
-            
             {% if deductions.paginator.num_pages > 1 %}
             <div class="text-center">
                 <ul class="pagination">
@@ -245,14 +251,10 @@
 
             <!-- LOANS -->
             <h3><b>پیشگی</b></h3>
-            <h3 style="color:Green"><b>{{total_loan|floatformat:0}}<b></h3>
+            <h3 style="color:Green"><b>{{ total_loan|floatformat:0 }}</b></h3>
             <table class="table table-bordered table-striped">
                 <thead>
-                    <tr>
-                        <th>تاریخ</th>
-                        <th>رقم (₹)</th>
-                        <th>نوٹ</th>
-                    </tr>
+                    <tr><th>تاریخ</th><th>رقم (₹)</th><th>نوٹ</th></tr>
                 </thead>
                 <tbody>
                     {% for loan in loans %}
@@ -262,13 +264,10 @@
                         <td>{{ loan.note|default:"—" }}</td>
                     </tr>
                     {% empty %}
-                    <tr>
-                        <td colspan="3" class="text-center">No loan records found.</td>
-                    </tr>
+                    <tr><td colspan="3" class="text-center">No loan records found.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
-
             {% if loans.paginator.num_pages > 1 %}
             <div class="text-center">
                 <ul class="pagination">
@@ -287,18 +286,14 @@
             </div>
             {% endif %}
 
-
             <hr>
 
             <!-- SAVINGS -->
             <h3><b>جمع</b></h3>
-            <h3 style="color:Green"><b>{{total_saving|floatformat:0}}<b></h3>
+            <h3 style="color:Green"><b>{{ total_saving|floatformat:0 }}</b></h3>
             <table class="table table-bordered table-striped">
                 <thead>
-                    <tr>
-                        <th>تاریخ</th>
-                        <th>رقم (₹)</th>
-                    </tr>
+                    <tr><th>تاریخ</th><th>رقم (₹)</th></tr>
                 </thead>
                 <tbody>
                     {% for save in savings %}
@@ -307,13 +302,10 @@
                         <td style="color:green;">₹{{ save.amount|floatformat:0 }}</td>
                     </tr>
                     {% empty %}
-                    <tr>
-                        <td colspan="2" class="text-center">No savings found.</td>
-                    </tr>
+                    <tr><td colspan="2" class="text-center">No savings found.</td></tr>
                     {% endfor %}
                 </tbody>
             </table>
-
             {% if savings.paginator.num_pages > 1 %}
             <div class="text-center">
                 <ul class="pagination">
@@ -352,7 +344,6 @@
                     {% endfor %}
                 </tbody>
             </table>
-
             {% if payments.paginator.num_pages > 1 %}
             <div class="text-center">
                 <ul class="pagination">
@@ -374,8 +365,6 @@
         </div>
     </div>
 </section>
-```
 
 </div>
-
 {% endblock %}

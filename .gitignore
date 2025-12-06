@@ -1,4 +1,36 @@
-db.sqlite3
-.pyc
+# Python compiled files
 *.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.so
+
+# Virtual environment
+env/
+venv/
+bhatta_env/
+
+# SQLite database
+db.sqlite3
+
+# Django stuff:
+*.log
+*.pot
+*.py[cod]
+*.swp
+*.DS_Store
+*.sqlite3
+*.sqlite
+
+# Editor/IDE
+*.idea/
+*.vscode/
+*.sublime-project
+*.sublime-workspace
 *~
+
+# Coverage reports
+.coverage
+htmlcov/
+coverage.xml
+*.cover
