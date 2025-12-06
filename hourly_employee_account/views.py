@@ -268,9 +268,11 @@ def employee_detail(request, emp_id):
     weekly_advance_deducted = sum(
         d.amount for d in HourlyAdvanceDeduction.objects.filter(employee=employee, payment__date__range=(week_dates[0], week_dates[-1]))
     )
-
+    weekly_advance = sum(
+        d.amount for d in HourlyAdvance.objects.filter(employee=employee, date__range=(week_dates[0], week_dates[-1]))
+    )
     # Remaining for the week (cannot be negative)
-    remaining = weekly_total - weekly_paid - weekly_advance_deducted - total_saving
+    remaining = weekly_total - weekly_paid - weekly_advance - total_saving
     if remaining < 0:
         remaining = Decimal("0")
 
@@ -279,7 +281,8 @@ def employee_detail(request, emp_id):
     advances = HourlyAdvance.objects.filter(employee=employee).order_by("-date")
     savings  = HourlySaving.objects.filter(employee=employee).order_by("-date")
     loans    = HourlyLoan.objects.filter(employee=employee).order_by("-date")
-
+    print(advances)
+    print("__________________coming")
     return render(request, "hourly_employee/employee_detail.html", {
         "employee": employee,
         "week_dates": week_dates,

@@ -34,35 +34,38 @@ class PaymentCreateView(CreateView):
     def get_initial(self):
         initial = super().get_initial()
         emp_id = self.request.GET.get('employee')
+
         if emp_id:
             initial['employee'] = emp_id
+
         return initial
 
     def form_valid(self, form):
         payment = form.save(commit=False)
         employee = payment.employee
 
-        original_amount = Decimal(payment.amount)
-        outstanding_advance = get_outstanding_advance(employee)
+        # Calculate outstanding advance BEFORE saving
+        outstanding = get_outstanding_advance(employee)
 
         with transaction.atomic():
-            payment.save()  # Save full amount (1000)
+            # Save payment first
+            payment.save()
 
-            if outstanding_advance > 0:
-                deduct = min(original_amount, outstanding_advance)
-
+            # Deduct full outstanding advance (not limited by payment amount)
+            if outstanding > 0:
                 AdvanceDeduction.objects.create(
                     employee=employee,
                     payment=payment,
                     date=payment.date,
-                    amount=deduct,
+                    amount=outstanding,   # 💥 FIXED: deduct full amount
                 )
 
-                # reduce outstanding but DO NOT modify payment.amount
-                remaining_after_deduct = original_amount - deduct
-                # remaining_after_deduct is used only for display, not saved
+                # Reduce the payment *actual money given*
+                # payment.amount = payment.amount - outstanding
+                payment.save()
 
         return super().form_valid(form)
+
 
 
 
