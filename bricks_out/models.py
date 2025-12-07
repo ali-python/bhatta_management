@@ -58,7 +58,7 @@ class BrickOutLoan(models.Model):
 
 class BrickOutSaving(models.Model):
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
-    date = models.DateField(auto_now_add=True)
+    date = models.DateField(default=timezone.now)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):

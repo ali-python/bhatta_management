@@ -223,12 +223,16 @@ from datetime import timedelta
 
 from datetime import timedelta, date
 from django.db.models import Sum
+from decimal import Decimal
+from django.shortcuts import get_object_or_404, render
 from django.core.paginator import Paginator
+from django.db.models import Sum
+from .models import Employee, BrickOutLoan, BrickOutSaving
 
 def employee_ledger(request, pk):
     employee = get_object_or_404(Employee, pk=pk)
 
-    # ALL RELATED DATA
+    # Fetch related data
     works = employee.works.all().order_by('date')
     advances_list = employee.advances.all().order_by('-date')
     payments_list = employee.payment_set.all().order_by('-date')
@@ -236,140 +240,133 @@ def employee_ledger(request, pk):
     loan_list = BrickOutLoan.objects.filter(employee=employee).order_by('-date')
     saving_list = BrickOutSaving.objects.filter(employee=employee).order_by('-date')
 
-    # SUMMARY DATA
-    total_bricks = works.aggregate(Sum('quantity'))['quantity__sum'] or 0
-    total_amount = sum(Decimal(w.calculate_amount()) for w in works)
-
-    total_advance = advances_list.aggregate(total=Sum('amount'))['total'] or Decimal('0.0')
-    total_deducted = deductions_list.aggregate(total=Sum('amount'))['total'] or Decimal('0.0')
-    remaining_advance = total_advance - total_deducted
-
-    total_paid = payments_list.aggregate(total=Sum('amount'))['total'] or Decimal('0.0')
-    total_loan = loan_list.aggregate(total=Sum('amount'))['total'] or Decimal('0.0')
-    total_saving = saving_list.aggregate(total=Sum('amount'))['total'] or Decimal('0.0')
-
-    if total_paid == 0 and total_deducted == 0:
-        balance = total_amount - total_advance
-    else:
-        balance = total_amount - total_paid - total_advance - total_saving
-
     # WEEK-WISE DATA (Saturday → Friday)
-    # Collect all dates across all models to cover weeks with no work
-    all_dates = []
+    all_dates = [item.date for item in works] + \
+                [item.date for item in advances_list] + \
+                [item.date for item in payments_list] + \
+                [item.date for item in deductions_list] + \
+                [item.date for item in loan_list] + \
+                [item.date for item in saving_list]
 
-    all_dates += [w.date for w in works]
-    all_dates += [a.date for a in advances_list]
-    all_dates += [p.date for p in payments_list]
-    all_dates += [d.date for d in deductions_list]
-    all_dates += [l.date for l in loan_list]
-    all_dates += [s.date for s in saving_list]
+    start_date = min(all_dates) if all_dates else date.today()
+    end_date = max(all_dates) if all_dates else date.today()
 
-    if all_dates:
-        start_date = min(all_dates)
-        end_date = max(all_dates)
-    else:
-        start_date = end_date = date.today()
-
-    # Generate week ranges from start_date → end_date
+    # Generate week ranges
     current = start_date
-    week_data = {}
-
+    week_data_list = []
+    week_number = 1
     while current <= end_date:
-        # Week start = nearest past Saturday
-        weekday = current.weekday()  # Monday=0 ... Sunday=6
+        weekday = current.weekday()
         days_since_saturday = (weekday - 5) % 7
         week_start = current - timedelta(days=days_since_saturday)
         week_end = week_start + timedelta(days=6)
-        key = f"{week_start}-{week_end}"
 
-        if key not in week_data:
-            week_data[key] = {
-                "week_start": week_start,
-                "week_end": week_end,
-                "works": [],
-                "payments": [],
-                "advances": [],
-                "deductions": [],
-                "loans": [],
-                "savings": [],
-                "week_total": 0,
-                "week_bricks": 0,
-            }
+        # Filter data by week
+        week_works = [w for w in works if week_start <= w.date <= week_end]
+        week_advances = [a for a in advances_list if week_start <= a.date <= week_end]
+        week_payments = [p for p in payments_list if week_start <= p.date <= week_end]
+        week_deductions = [d for d in deductions_list if week_start <= d.date <= week_end]
+        week_savings = [s for s in saving_list if week_start <= s.date <= week_end]
+
+        # Weekly totals
+        week_total_bricks = sum(w.quantity for w in week_works)
+        week_total_amount = sum(Decimal(w.calculate_amount()) for w in week_works)
+        week_total_advances = sum(a.amount for a in week_advances)
+        week_total_deductions = sum(d.amount for d in week_deductions)
+        week_total_payments = sum(p.amount for p in week_payments)
+        week_total_savings = sum(s.amount for s in week_savings)
+        print(week_total_amount)
+        print(week_total_advances)
+        print(week_total_deductions)
+        print(week_total_payments)
+        print(week_total_savings)
+        # Weekly balance including savings
+        week_balance = week_total_amount - week_total_advances  - week_total_payments - week_total_savings
+
+        week_data_list.append({
+            "week_number": week_number,
+            "week_start": week_start,
+            "week_end": week_end,
+            "works": week_works,
+            "advances": week_advances,
+            "payments": week_payments,
+            "deductions": week_deductions,
+            "savings": week_savings,
+            "week_bricks": week_total_bricks,
+            "week_total": week_total_amount,
+            "week_advances": week_total_advances,
+            "week_deductions": week_total_deductions,
+            "week_payments": week_total_payments,
+            "week_savings": week_total_savings,
+            "week_balance": week_balance,
+        })
 
         current += timedelta(days=7)
+        week_number += 1
 
-    # Assign records to weeks
-    for w in works:
-        for key, week in week_data.items():
-            if week['week_start'] <= w.date <= week['week_end']:
-                week['works'].append(w)
-                week['week_total'] += w.calculate_amount()
-                week['week_bricks'] += w.quantity
-                break
+    # Reverse weeks to show latest on top
+    week_data_list = list(reversed(week_data_list))
+    for idx, week in enumerate(week_data_list, start=1):
+        week['week_number'] = idx  # Latest week is week 1
 
-    for p in payments_list:
-        for key, week in week_data.items():
-            if week['week_start'] <= p.date <= week['week_end']:
-                week['payments'].append(p)
-                break
+    # PAGINATE WEEKS (1 per page)
+    paginator = Paginator(week_data_list, 1)
+    week_page_number = request.GET.get('week_page', 1)
+    week_data = paginator.get_page(week_page_number)
 
-    for a in advances_list:
-        for key, week in week_data.items():
-            if week['week_start'] <= a.date <= week['week_end']:
-                week['advances'].append(a)
-                break
+    # Use current week totals for summary card
+    current_week = week_data.object_list[0] if week_data.object_list else {}
+    total_bricks = current_week.get('week_bricks', 0)
+    total_amount = current_week.get('week_total', 0)
+    total_advance = current_week.get('week_advances', 0)
+    total_deducted = current_week.get('week_deductions', 0)
+    total_paid = current_week.get('week_payments', 0)
+    total_saving_week = current_week.get('week_savings', 0)
+    balance = current_week.get('week_balance', 0)
 
-    for d in deductions_list:
-        for key, week in week_data.items():
-            if week['week_start'] <= d.date <= week['week_end']:
-                week['deductions'].append(d)
-                break
+    # PAGINATE ADVANCES
+    adv_paginator = Paginator(advances_list, 10)
+    adv_page_number = request.GET.get('adv_page', 1)
+    advances = adv_paginator.get_page(adv_page_number)
 
-    for l in loan_list:
-        for key, week in week_data.items():
-            if week['week_start'] <= l.date <= week['week_end']:
-                week['loans'].append(l)
-                break
+    # PAGINATE DEDUCTIONS
+    ded_paginator = Paginator(deductions_list, 10)
+    ded_page_number = request.GET.get('ded_page', 1)
+    deductions = ded_paginator.get_page(ded_page_number)
 
-    for s in saving_list:
-        for key, week in week_data.items():
-            if week['week_start'] <= s.date <= week['week_end']:
-                week['savings'].append(s)
-                break
+    # PAGINATE PAYMENTS
+    pay_paginator = Paginator(payments_list, 10)
+    pay_page_number = request.GET.get('pay_page', 1)
+    payments = pay_paginator.get_page(pay_page_number)
 
-    # Convert dict → list and paginate
-    week_data_list = list(week_data.values())
-    week_page = Paginator(week_data_list, 10).get_page(request.GET.get('weeks_page'))
-    adv_page = Paginator(advances_list, 20).get_page(request.GET.get('adv_page'))
-    pay_page = Paginator(payments_list, 20).get_page(request.GET.get('pay_page'))
-    ded_page = Paginator(deductions_list, 20).get_page(request.GET.get("ded_page"))
-    loan_page = Paginator(loan_list, 20).get_page(request.GET.get("loan_page"))
-    saving_page = Paginator(saving_list, 20).get_page(request.GET.get("saving_page"))
+    # Loans and savings remain full (no pagination)
+    loans = loan_list
+    savings = saving_list
 
-    # RENDER
+    # Total loan and total savings for all weeks (unchanged)
+    total_loan = loan_list.aggregate(total=Sum('amount'))['total'] or 0
+    total_saving = saving_list.aggregate(total=Sum('amount'))['total'] or 0
+
     return render(request, "bricks_out/employee_ledger.html", {
         "employee": employee,
-
-        "total_bricks": total_bricks,
-        "total_amount": total_amount,
-
-        "total_advance": total_advance,
-        "total_deducted": total_deducted,
-        "remaining_advance": remaining_advance,
-
-        "total_paid": total_paid,
-        "balance": balance,
-
+        "week_data": week_data,
+        "advances": advances,
+        "deductions": deductions,
+        "payments": payments,
+        "loans": loans,
+        "savings": savings,
         "total_loan": total_loan,
         "total_saving": total_saving,
-
-        "week_data": week_page,
-        "advances": adv_page,
-        "payments": pay_page,
-        "deductions": ded_page,
-        "loans": loan_page,
-        "savings": saving_page,
+        "total_bricks": total_bricks,
+        "total_amount": total_amount,
+        "total_advance": total_advance,
+        "total_deducted": total_deducted,
+        "total_paid": total_paid,
+        "total_saving_week": total_saving_week,  # weekly saving
+        "balance": balance,
     })
+
+
 
 
 from django.shortcuts import render, redirect

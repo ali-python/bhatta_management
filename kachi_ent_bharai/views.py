@@ -246,10 +246,13 @@ def give_brick_payment(request, emp_id):
 
     # Total advance already deducted
     total_advance_deducted = sum(d.amount for d in KachiBrickAdvanceDeduction.objects.filter(employee=emp))
-
+    totalamount = sum(
+        entry.bricks_count * emp.rate_per_1000
+        for entry in KachiBrickWorkEntry.objects.filter(employee=emp)
+    )
     # Pending advance (remaining to deduct)
     remaining_advance = total_advance_taken - total_advance_deducted
-
+    
     if request.method == "POST":
         form = BrickPaymentForm(request.POST)
         if form.is_valid():
@@ -258,7 +261,7 @@ def give_brick_payment(request, emp_id):
             payment.save()
 
             # Deduction amount = minimum of (payment.amount, remaining_advance)
-            deduct_amount = min(payment.amount, remaining_advance)
+            deduct_amount = min(totalamount, remaining_advance)
 
             if deduct_amount > 0:
                 KachiBrickAdvanceDeduction.objects.create(
