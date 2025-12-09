@@ -62,8 +62,8 @@
                             {% endfor %}
                             <th>ٹوٹل رقم </th>
                             <th>خرچہ (₹)</th>
-                            <th>پیشگی (₹)</th>
                             <th>جمع (₹)</th>
+                            <th>پیشگی (₹)</th>
                             <th>ادا شُدہ (₹)</th>
                             <th>باقی (₹)</th>
                             <!-- <th>ادائیگی (₹)</th> -->
@@ -131,8 +131,8 @@
 
                             <td><b>₹{{ row.total|floatformat:0 }}</b></td>
                             <td>₹{{ row.advance|floatformat:0 }}</td>
-                            <td>₹{{row.total_loan|floatformat:0}}</td>
                             <td>₹{{ row.saving|floatformat:0 }}</td>
+                            <td>₹{{row.total_loan|floatformat:0}}</td>
                             <td>₹{{ row.paid|floatformat:0 }}</td>
                             <td><b>₹{{ row.remaining|floatformat:0 }}</b></td>
 
