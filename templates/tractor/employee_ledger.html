@@ -66,6 +66,7 @@
                                     <th>ٹریکٹر</th>
                                     <th>گاہک</th>
                                     <th>اینٹ</th>
+                                    <th>قسم</th>
                                     <th>حصہ (₹)</th>
                                 </tr>
                             </thead>
@@ -76,6 +77,8 @@
                                     <td>{{ trip.tractor.name }}</td>
                                     <td>{{ trip.customer.name }}</td>
                                     <td>{{ trip.bricks_carried }}</td>
+                                                                        <td>₹{{ trip.brick_type }}</td>
+
                                     <td>
                                         {% if trip.driver == employee %}
                                             ₹{{ trip.driver_share|floatformat:0 }}

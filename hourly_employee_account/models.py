@@ -23,7 +23,7 @@ class HourEntry(models.Model):
 
 class HourlyAdvance(models.Model):
     employee = models.ForeignKey(HourlyEmployee, on_delete=models.CASCADE)
-    date = models.DateField(auto_now_add=True)
+    date = models.DateField(default=timezone.now)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
@@ -32,7 +32,7 @@ class HourlyAdvance(models.Model):
 
 class HourlySaving(models.Model):
     employee = models.ForeignKey(HourlyEmployee, on_delete=models.CASCADE)
-    date = models.DateField(auto_now_add=True)
+    date = models.DateField(default=timezone.now)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
@@ -41,7 +41,7 @@ class HourlySaving(models.Model):
 
 class HourlyPayment(models.Model):
     employee = models.ForeignKey(HourlyEmployee, on_delete=models.CASCADE)
-    date = models.DateField(auto_now_add=True)
+    date = models.DateField(default=timezone.now)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
@@ -61,4 +61,4 @@ class HourlyAdvanceDeduction(models.Model):
     employee = models.ForeignKey(HourlyEmployee, on_delete=models.CASCADE)
     payment = models.ForeignKey(HourlyPayment, on_delete=models.CASCADE)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
-    date = models.DateField(auto_now_add=True)
+    date = models.DateField(default=timezone.now)
