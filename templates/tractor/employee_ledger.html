@@ -21,8 +21,8 @@
             </div>
             <div class="box-body">
 
-                <!-- Summary -->
-                <h4><b>خلاصہ</b></h4>
+                <!-- Overall Summary -->
+                <h4><b>مجموعی خلاصہ (تمام ہفتے)</b></h4>
                 <table class="table table-bordered table-striped">
                     <thead>
                         <tr>
@@ -38,8 +38,8 @@
                         <tr>
                             <td>₹{{ total_trip_amount|floatformat:0 }}</td>
                             <td>₹{{ total_advance|floatformat:0 }}</td>
-                            <td>₹{{total_loan|floatformat:0 }}</td>
-                            <td>₹{{total_saving|floatformat:0 }}</td>
+                            <td>₹{{ total_loan|floatformat:0 }}</td>
+                            <td>₹{{ total_saving|floatformat:0 }}</td>
                             <td>₹{{ total_paid|floatformat:0 }}</td>
                             <td><b>₹{{ balance|floatformat:0 }}</b></td>
                         </tr>
@@ -48,17 +48,47 @@
 
                 <hr>
 
-                <!-- Trip Records -->
+                <!-- Weekly Trip Records -->
                 <h4><b>ہفتہ وار تفصیلات</b></h4>
 
-                {% for week_start, trips in weekly_trips %}
+                {% for week_data in weekly_trips %}
                 <div class="box box-primary">
-                    <div class="box-header">
+                    <div class="box-header" style="background-color: #3c8dbc; color: white; padding: 15px;">
                         <h4>
-                            <b>ہفتہ:</b> {{ week_start }} → {{ week_start|add:"6 days" }}
+                            <b>ہفتہ:</b> {{ week_data.week_start|date:"d M Y" }} → {{ week_data.week_end|date:"d M Y" }}
                         </h4>
                     </div>
                     <div class="box-body">
+                        
+                        <!-- Weekly Summary -->
+                        <h5><b>ہفتے کا خلاصہ</b></h5>
+                        <table class="table table-bordered table-striped table-condensed">
+                            <thead class="bg-info">
+                                <tr>
+                                    <th>چکر رقم (₹)</th>
+                                    <th>خرچہ (₹)</th>
+                                    <th>پیشگی (₹)</th>
+                                    <th>جمع (₹)</th>
+                                    <th>ادایگی (₹)</th>
+                                    <th>ہفتے کا بقایا (₹)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>₹{{ week_data.week_trip_total|floatformat:0 }}</td>
+                                    <td>₹{{ week_data.week_advance_total|floatformat:0 }}</td>
+                                    <td>₹{{ week_data.week_loan_total|floatformat:0 }}</td>
+                                    <td>₹{{ week_data.week_saving_total|floatformat:0 }}</td>
+                                    <td>₹{{ week_data.week_payment_total|floatformat:0 }}</td>
+                                    <td><b>₹{{ week_data.week_balance|floatformat:0 }}</b></td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <br>
+
+                        <!-- Trip Details -->
+                        <h5><b>چکر تفصیلات</b></h5>
                         <table class="table table-bordered table-striped">
                             <thead>
                                 <tr>
@@ -71,14 +101,13 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for trip in trips %}
+                                {% for trip in week_data.trips %}
                                 <tr>
-                                    <td>{{ trip.date }}</td>
+                                    <td>{{ trip.date|date:"d M Y" }}</td>
                                     <td>{{ trip.tractor.name }}</td>
                                     <td>{{ trip.customer.name }}</td>
                                     <td>{{ trip.bricks_carried }}</td>
-                                                                        <td>₹{{ trip.brick_type }}</td>
-
+                                    <td>{{ trip.brick_type }}</td>
                                     <td>
                                         {% if trip.driver == employee %}
                                             ₹{{ trip.driver_share|floatformat:0 }}
@@ -90,10 +119,113 @@
                                 {% endfor %}
                             </tbody>
                         </table>
+
+                        <!-- Financial Details (if any exist for this week) -->
+                        {% if week_data.advances or week_data.payments or week_data.loans or week_data.savings %}
+                        <br>
+                        <h5><b>مالیاتی لین دین</b></h5>
+                        
+                        <div class="row">
+                            <!-- Advances -->
+                            {% if week_data.advances %}
+                            <div class="col-md-6">
+                                <h6><b>خرچے</b></h6>
+                                <table class="table table-bordered table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>تاریخ</th>
+                                            <th>رقم (₹)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for advance in week_data.advances %}
+                                        <tr>
+                                            <td>{{ advance.date|date:"d M Y" }}</td>
+                                            <td>₹{{ advance.amount|floatformat:0 }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% endif %}
+
+                            <!-- Payments -->
+                            {% if week_data.payments %}
+                            <div class="col-md-6">
+                                <h6><b>ادایگیاں</b></h6>
+                                <table class="table table-bordered table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>تاریخ</th>
+                                            <th>رقم (₹)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for payment in week_data.payments %}
+                                        <tr>
+                                            <td>{{ payment.date|date:"d M Y" }}</td>
+                                            <td>₹{{ payment.amount|floatformat:0 }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="row">
+                            <!-- Loans -->
+                            {% if week_data.loans %}
+                            <div class="col-md-6">
+                                <h6><b>پیشگی</b></h6>
+                                <table class="table table-bordered table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>تاریخ</th>
+                                            <th>رقم (₹)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for loan in week_data.loans %}
+                                        <tr>
+                                            <td>{{ loan.date|date:"d M Y" }}</td>
+                                            <td>₹{{ loan.amount|floatformat:0 }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% endif %}
+
+                            <!-- Savings -->
+                            {% if week_data.savings %}
+                            <div class="col-md-6">
+                                <h6><b>جمع</b></h6>
+                                <table class="table table-bordered table-sm">
+                                    <thead>
+                                        <tr>
+                                            <th>تاریخ</th>
+                                            <th>رقم (₹)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for saving in week_data.savings %}
+                                        <tr>
+                                            <td>{{ saving.date|date:"d M Y" }}</td>
+                                            <td>₹{{ saving.amount|floatformat:0 }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
                     </div>
                 </div>
                 {% empty %}
-                <p>No trips found.</p>
+                <p>کوئی چکر نہیں ملا۔</p>
                 {% endfor %}
 
                 <!-- Pagination -->
@@ -102,9 +234,9 @@
                         <ul class="pagination">
 
                             {% if weekly_trips.has_previous %}
-                                <li><a href="?page={{ weekly_trips.previous_page_number }}">&laquo; Prev</a></li>
+                                <li><a href="?page={{ weekly_trips.previous_page_number }}">&laquo; پچھلا</a></li>
                             {% else %}
-                                <li class="disabled"><span>&laquo; Prev</span></li>
+                                <li class="disabled"><span>&laquo; پچھلا</span></li>
                             {% endif %}
 
                             {% for num in weekly_trips.paginator.page_range %}
@@ -116,9 +248,9 @@
                             {% endfor %}
 
                             {% if weekly_trips.has_next %}
-                                <li><a href="?page={{ weekly_trips.next_page_number }}">Next &raquo;</a></li>
+                                <li><a href="?page={{ weekly_trips.next_page_number }}">اگلا &raquo;</a></li>
                             {% else %}
-                                <li class="disabled"><span>Next &raquo;</span></li>
+                                <li class="disabled"><span>اگلا &raquo;</span></li>
                             {% endif %}
 
                         </ul>

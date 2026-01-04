@@ -356,7 +356,6 @@ from django.db.models import Q
 from datetime import timedelta
 from decimal import Decimal
 from collections import defaultdict
-
 def employee_ledger(request, pk):
     employee = get_object_or_404(TractorEmployee, pk=pk)
 
@@ -364,7 +363,13 @@ def employee_ledger(request, pk):
         Q(driver=employee) | Q(conductor=employee)
     ).order_by("-date")
 
-    # GROUP TRIPS SATURDAY → FRIDAY
+    # Get all financial records
+    all_advances = TractorAdvance.objects.filter(employee=employee)
+    all_payments = TractorPayment.objects.filter(employee=employee)
+    all_loans = TractorLoan.objects.filter(employee=employee)
+    all_savings = TractortSaving.objects.filter(employee=employee)
+
+    # GROUP TRIPS SATURDAY → FRIDAY WITH WEEKLY SUMMARY
     week_groups = defaultdict(list)
     for trip in all_trips:
         weekday = trip.date.weekday()  # Monday=0 ... Sunday=6
@@ -372,18 +377,60 @@ def employee_ledger(request, pk):
         week_start = trip.date - timedelta(days=days_since_saturday)
         week_groups[week_start].append(trip)
 
-    weekly_list = sorted(week_groups.items(), reverse=True)
+    # Calculate weekly summaries with all financial data
+    weekly_data = []
+    for week_start, trips in sorted(week_groups.items(), reverse=True):
+        week_end = week_start + timedelta(days=6)
+        
+        # Calculate trip earnings for the week
+        week_trip_total = Decimal("0")
+        for trip in trips:
+            if trip.driver == employee:
+                week_trip_total += Decimal(trip.driver_share())
+            else:
+                week_trip_total += Decimal(trip.conductor_share())
+        
+        # Calculate advances for the week
+        week_advances = all_advances.filter(date__range=[week_start, week_end])
+        week_advance_total = sum(Decimal(a.amount) for a in week_advances) if week_advances.exists() else Decimal("0")
+        
+        # Calculate payments for the week
+        week_payments = all_payments.filter(date__range=[week_start, week_end])
+        week_payment_total = sum(Decimal(p.amount) for p in week_payments) if week_payments.exists() else Decimal("0")
+        
+        # Calculate loans for the week
+        week_loans = all_loans.filter(date__range=[week_start, week_end])
+        week_loan_total = sum(Decimal(l.amount) for l in week_loans) if week_loans.exists() else Decimal("0")
+        
+        # Calculate savings for the week
+        week_savings = all_savings.filter(date__range=[week_start, week_end])
+        week_saving_total = sum(Decimal(s.amount) for s in week_savings) if week_savings.exists() else Decimal("0")
+        
+        # Calculate week balance
+        week_balance = week_trip_total - week_advance_total - week_payment_total - week_saving_total
+        
+        weekly_data.append({
+            'week_start': week_start,
+            'week_end': week_end,
+            'trips': trips,
+            'week_trip_total': week_trip_total,
+            'week_advance_total': week_advance_total,
+            'week_payment_total': week_payment_total,
+            'week_loan_total': week_loan_total,
+            'week_saving_total': week_saving_total,
+            'week_balance': week_balance,
+            'advances': week_advances,
+            'payments': week_payments,
+            'loans': week_loans,
+            'savings': week_savings,
+        })
 
-    # 👉 PAGINATION  — THIS IS REQUIRED
-    paginator = Paginator(weekly_list, 5)  # 10 weeks per page
+    # 👉 PAGINATION
+    paginator = Paginator(weekly_data, 4)  # 4 weeks per page
     page = request.GET.get("page")
     weekly_trips = paginator.get_page(page)
 
-    # --- totals ---
-    advances = TractorAdvance.objects.filter(employee=employee)
-    payments = TractorPayment.objects.filter(employee=employee)
-    loan = TractorLoan.objects.filter(employee=employee)
-    saving = TractortSaving.objects.filter(employee=employee)
+    # --- Overall totals ---
     total_trip_amount = Decimal("0")
     for trip in all_trips:
         if trip.driver == employee:
@@ -391,27 +438,24 @@ def employee_ledger(request, pk):
         else:
             total_trip_amount += Decimal(trip.conductor_share())
 
-    total_advance = sum(Decimal(a.amount) for a in advances)
-    total_paid = sum(Decimal(p.amount) for p in payments)
-    total_loan = sum(Decimal(l.amount) for l in loan)
-    total_saving = sum(Decimal(s.amount) for s in saving)
+    total_advance = sum(Decimal(a.amount) for a in all_advances)
+    total_paid = sum(Decimal(p.amount) for p in all_payments)
+    total_loan = sum(Decimal(l.amount) for l in all_loans)
+    total_saving = sum(Decimal(s.amount) for s in all_savings)
     balance = total_trip_amount - total_advance - total_paid - total_saving
 
     context = {
         "employee": employee,
-        "weekly_trips": weekly_trips,  # IMPORTANT
-        "advances": advances,
-        "payments": payments,
+        "weekly_trips": weekly_trips,
         "total_trip_amount": total_trip_amount,
         "total_advance": total_advance,
         "total_paid": total_paid,
         "balance": balance,
-        "total_loan" : total_loan,
-        "total_saving" : total_saving
+        "total_loan": total_loan,
+        "total_saving": total_saving
     }
 
     return render(request, "tractor/employee_ledger.html", context)
-
 from django.shortcuts import render
 from django.db.models import Q
 from django.utils import timezone

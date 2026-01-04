@@ -5,7 +5,6 @@
 <div class="content-wrapper p-4" style="padding-left: 15px;">
 
 <!-- Header -->
-
 <div class="mb-4">
     <br>
     <a href="{% url 'tractor:create_customer_ledger' customer.id %}" class="btn btn-primary mb-3">
@@ -17,19 +16,15 @@
     <h3 class="mb-1">{{ customer.name }} — کھاتہ</h3>
     <p class="text-muted">فون نمبر: {{ customer.phone }} | پتہ: {{ customer.address }}</p>
 
-```
-<div class="alert alert-info shadow-sm" style="font-size: 20px;">
-    <strong>بقایا رقم:</strong> ₹{{ balance|floatformat:0 }}
-</div>
-```
-
+    <div class="alert alert-info shadow-sm" style="font-size: 20px;">
+        <strong>بقایا رقم:</strong> ₹{{ balance|floatformat:0 }}
+    </div>
 </div>
 
 <!-- Trips Card -->
-
 <div class="card shadow-sm mb-4 border-primary">
     <div class="card-header bg-primary text-white">
-        <h3 class="mb-0">  چکر رِیکارڈ</h3>
+        <h3 class="mb-0">چکر رِیکارڈ</h3>
     </div>
     <div class="card-body p-0 table-responsive">
         <table class="table table-striped table-hover text-center mb-0">
@@ -61,10 +56,34 @@
             </tbody>
         </table>
     </div>
+    
+    <!-- Trips Pagination -->
+    {% if trips.has_other_pages %}
+    <div class="card-footer">
+        <nav aria-label="Trip pagination">
+            <ul class="pagination justify-content-center mb-0">
+                {% if trips.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?trip_page={{ trips.previous_page_number }}&payment_page={{ payments.number }}&ledger_page={{ ledger_items.number }}&advance_page={{ advances.number }}">پچھلا</a>
+                </li>
+                {% endif %}
+                
+                <li class="page-item active">
+                    <span class="page-link">صفحہ {{ trips.number }} از {{ trips.paginator.num_pages }}</span>
+                </li>
+                
+                {% if trips.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?trip_page={{ trips.next_page_number }}&payment_page={{ payments.number }}&ledger_page={{ ledger_items.number }}&advance_page={{ advances.number }}">اگلا</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
 </div>
 
 <!-- Advance Payments Card -->
-
 <div class="card shadow-sm mb-4 border-info">
     <div class="card-header bg-info text-white">
         <h3 class="mb-0">ایڈوانس رقم</h3>
@@ -95,15 +114,41 @@
             </tbody>
         </table>
     </div>
+    
+    <!-- Advance Payments Pagination -->
+    {% if advances.has_other_pages %}
+    <div class="card-footer">
+        <nav aria-label="Advance pagination">
+            <ul class="pagination justify-content-center mb-0">
+                {% if advances.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?trip_page={{ trips.number }}&payment_page={{ payments.number }}&ledger_page={{ ledger_items.number }}&advance_page={{ advances.previous_page_number }}">پچھلا</a>
+                </li>
+                {% endif %}
+                
+                <li class="page-item active">
+                    <span class="page-link">صفحہ {{ advances.number }} از {{ advances.paginator.num_pages }}</span>
+                </li>
+                
+                {% if advances.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?trip_page={{ trips.number }}&payment_page={{ payments.number }}&ledger_page={{ ledger_items.number }}&advance_page={{ advances.next_page_number }}">اگلا</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
 </div>
 
 <!-- Payments Card -->
-
 <div class="card shadow-sm mb-4 border-success">
     <div class="card-header bg-success text-white">
         <h3 class="mb-0">ادائیگیاں</h3>
     </div>
-    <div style="color: blue;"><h3>Total Paid: ₹{{ total_paid|floatformat:0 }}</h3></div>
+    <div style="color: blue; padding: 15px;">
+        <h3>Total Paid: ₹{{ total_paid|floatformat:0 }}</h3>
+    </div>
     <div class="card-body p-0 table-responsive">
         <table class="table table-striped table-hover text-center mb-0">
             <thead class="table-dark">
@@ -124,16 +169,40 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="2" class="text-muted">No payments recorded yet.</td>
+                    <td colspan="3" class="text-muted">No payments recorded yet.</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
+    
+    <!-- Payments Pagination -->
+    {% if payments.has_other_pages %}
+    <div class="card-footer">
+        <nav aria-label="Payment pagination">
+            <ul class="pagination justify-content-center mb-0">
+                {% if payments.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?trip_page={{ trips.number }}&payment_page={{ payments.previous_page_number }}&ledger_page={{ ledger_items.number }}&advance_page={{ advances.number }}">پچھلا</a>
+                </li>
+                {% endif %}
+                
+                <li class="page-item active">
+                    <span class="page-link">صفحہ {{ payments.number }} از {{ payments.paginator.num_pages }}</span>
+                </li>
+                
+                {% if payments.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?trip_page={{ trips.number }}&payment_page={{ payments.next_page_number }}&ledger_page={{ ledger_items.number }}&advance_page={{ advances.number }}">اگلا</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
 </div>
 
 <!-- Ledger History -->
-
 <div class="card shadow-sm mb-4 border-warning">
     <div class="card-header bg-warning text-white">
         <h3 class="mb-0">کھاتہ کی تاریخ</h3>
@@ -164,10 +233,34 @@
             </tbody>
         </table>
     </div>
+    
+    <!-- Ledger Pagination -->
+    {% if ledger_items.has_other_pages %}
+    <div class="card-footer">
+        <nav aria-label="Ledger pagination">
+            <ul class="pagination justify-content-center mb-0">
+                {% if ledger_items.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?trip_page={{ trips.number }}&payment_page={{ payments.number }}&ledger_page={{ ledger_items.previous_page_number }}&advance_page={{ advances.number }}">پچھلا</a>
+                </li>
+                {% endif %}
+                
+                <li class="page-item active">
+                    <span class="page-link">صفحہ {{ ledger_items.number }} از {{ ledger_items.paginator.num_pages }}</span>
+                </li>
+                
+                {% if ledger_items.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?trip_page={{ trips.number }}&payment_page={{ payments.number }}&ledger_page={{ ledger_items.next_page_number }}&advance_page={{ advances.number }}">اگلا</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
 </div>
 
 <!-- Add Payment Form -->
-
 <div class="card shadow-sm border-success mb-4">
     <div class="card-header bg-success text-white">
         <h3 class="mb-0">نئی ادائیگی شامل کریں</h3>
@@ -183,7 +276,7 @@
                 </div>
             </div>
             <br>
-            <div class="row">
+            <div class="row justify-content-center">
                 <div class="col-md-4">
                     <button type="submit" class="btn btn-success w-100 text-white">
                         ادائیگی شامل کریں

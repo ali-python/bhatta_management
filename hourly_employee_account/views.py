@@ -7,7 +7,8 @@ from .forms import HourlyEmployeeForm, HourlyAdvanceForm, HourlySavingForm, Hour
 from django.shortcuts import render, get_object_or_404
 from django.utils import timezone
 from decimal import Decimal
-
+from django.db.models import Sum
+from django.db.models import F
 from decimal import Decimal, ROUND_HALF_UP
 
 def hourly_dashboard(request):
@@ -74,7 +75,9 @@ def hourly_dashboard(request):
         saving = sum(s.amount for s in HourlySaving.objects.filter(employee=emp))
 
         total_hours = Decimal("0")
-
+        print(advance_taken)
+        print(advance_deducted)
+        print(advance_taken - advance_deducted) 
         row = {
             "employee": emp,
             "days": [],
@@ -167,39 +170,72 @@ def add_saving(request):
         "form": HourlySavingForm()
     })
 
-
 def give_payment(request, emp_id):
     emp = HourlyEmployee.objects.get(id=emp_id)
 
-    total_hours_amount = sum(
-        entry.hours * emp.hourly_rate
-        for entry in HourEntry.objects.filter(employee=emp)
+    # ---- CURRENT WEEK (SAT → FRI) ----
+    today = timezone.now().date()
+    weekday = today.weekday()
+    days_since_saturday = (weekday - 5) % 7
+    week_start = today - timedelta(days=days_since_saturday)
+    week_end = week_start + timedelta(days=6)
+
+    # ---- WEEKLY WORK AMOUNT ----
+    weekly_hours_amount = (
+        HourEntry.objects
+        .filter(employee=emp, date__range=(week_start, week_end))
+        .aggregate(
+            total=Sum(F("hours") * emp.hourly_rate)
+        )["total"] or Decimal("0")
     )
 
-    total_advance = sum(a.amount for a in HourlyAdvance.objects.filter(employee=emp))
-    total_deducted = sum(d.amount for d in HourlyAdvanceDeduction.objects.filter(employee=emp))
-    saving = sum(s.amount for s in HourlySaving.objects.filter(employee=emp))
-    paid = sum(p.amount for p in HourlyPayment.objects.filter(employee=emp))
+    # ---- WEEKLY ADVANCE ----
+    weekly_advance = (
+        HourlyAdvance.objects
+        .filter(employee=emp, date__range=(week_start, week_end))
+        .aggregate(total=Sum("amount"))["total"] or Decimal("0")
+    )
 
-    remaining_advance = total_advance - total_deducted
+    # ---- WEEKLY PAID ----
+    weekly_paid = (
+        HourlyPayment.objects
+        .filter(employee=emp, date__range=(week_start, week_end))
+        .aggregate(total=Sum("amount"))["total"] or Decimal("0")
+    )
 
-    remaining = total_hours_amount - paid - remaining_advance - saving
+    # ---- WEEKLY SAVING ----
+    weekly_saving = (
+        HourlySaving.objects
+        .filter(employee=emp, date__range=(week_start, week_end))
+        .aggregate(total=Sum("amount"))["total"] or Decimal("0")
+    )
+
+    # ✅ CORRECT WEEKLY REMAINING
+    remaining = (
+        weekly_hours_amount
+        - weekly_advance
+        - weekly_paid
+        - weekly_saving
+    )
 
     if request.method == "POST":
         amount = Decimal(request.POST.get("amount", "0"))
+
         if amount > 0:
-            payment = HourlyPayment.objects.create(employee=emp, amount=amount)
+            payment = HourlyPayment.objects.create(
+                employee=emp,
+                amount=amount,
+                date=today
+            )
 
-            # deduct advance first
-            if remaining_advance > 0:
-                deduct = min(amount, remaining_advance)
-
+            # ✅ CLOSE WEEK ADVANCE (FULL)
+            if weekly_advance > 0:
                 HourlyAdvanceDeduction.objects.create(
                     employee=emp,
                     payment=payment,
-                    amount=deduct
+                    amount=weekly_advance,
+                    date=today
                 )
-                payment.save()
 
         return redirect("hourly:employees_dashboard")
 
@@ -207,10 +243,6 @@ def give_payment(request, emp_id):
         "employee": emp,
         "remaining": remaining
     })
-
-
-
-
 
 
 def get_week_dates(offset=0):

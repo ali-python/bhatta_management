@@ -59,15 +59,15 @@
         </div>
         <div class="card-body p-2 d-flex justify-content-around text-center">
             <div>
-                <p class="mb-1">خرچہ:</p>
+                <p class="mb-1" style="font-size: 18px;">خرچہ:</p>
                 {% for advance in advances %}
-                <h5>₹{{ advance.amount|floatformat:0 }}</h5>
+                <h5>₹{{ advance.amount|floatformat:0 }} | {{ advance.date|date:"d M Y" }}</h5>
                 {% endfor %}
             </div>
             <div>
-                <p class="mb-1">جمع:</p>
+                <p class="mb-1" style="font-size: 18px;">جمع:</p>
                 {% for saving in savings %}
-                <h5>₹{{ saving.amount|floatformat:0 }}</h5>
+                <h5>₹{{ saving.amount|floatformat:0 }} | {{ saving.date|date:"d M Y" }}</h5>
                 {% endfor %}
             </div>
         </div>

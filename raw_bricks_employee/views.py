@@ -100,12 +100,17 @@ def bricks_dashboard(request):
             employee=emp
         ).aggregate(total=Sum("amount"))["total"] or Decimal("0")
 
+        saving_weekly = BrickSaving.objects.filter(
+            employee=emp,
+            date__in=week_dates
+        ).aggregate(total=Sum("amount"))["total"] or Decimal("0")
+
         loan = BrickLoan.objects.filter(
             employee=emp
         ).aggregate(total=Sum("amount"))["total"] or Decimal("0")
 
         # Correct remaining (weekly only)
-        remaining = weekly_total - advance - paid - saving 
+        remaining = weekly_total - advance - paid - saving_weekly
 
         table.append({
             "employee": emp,
@@ -169,7 +174,7 @@ def brick_employee_detail(request, emp_id):
     # All-time totals for summary
     total_saving = BrickSaving.objects.filter(employee=emp).aggregate(total=models.Sum("amount"))["total"] or Decimal("0")
     total_loan = BrickLoan.objects.filter(employee=emp).aggregate(total=models.Sum("amount"))["total"] or Decimal("0")
-    total_advance = BrickAdvance.objects.filter(employee=emp).aggregate(total=models.Sum("amount"))["total"] or Decimal("0")
+    total_advance = BrickAdvance.objects.filter(employee=emp, date__range=(week_dates[0], week_dates[-1])).aggregate(total=models.Sum("amount"))["total"] or Decimal("0")
     # Week-specific payments and advance deductions
     weekly_paid = BrickPayment.objects.filter(employee=emp, date__range=(week_dates[0], week_dates[-1])).aggregate(total=models.Sum("amount"))["total"] or Decimal("0")
     weekly_advance_deducted = BrickAdvanceDeduction.objects.filter(employee=emp, payment__date__range=(week_dates[0], week_dates[-1])).aggregate(total=models.Sum("amount"))["total"] or Decimal("0")
