@@ -68,23 +68,28 @@ def yearly_settlement_create(request, worker_id=None, bhatta_id=None):
     total_advance = 0
     total_loan = 0
 
+    # =========================
+    # GET LOGIC
+    # =========================
     if worker_id and bhatta_id:
         selected_worker = get_object_or_404(Worker, id=worker_id)
         selected_bhatta = get_object_or_404(Bhatta, id=bhatta_id)
 
-        # Total bricks for this worker
+        # ✅ TOTAL BRICKS (ALL RECORDS - NO DATE FILTER)
         total_bricks = WeeklyReport.objects.filter(
-            worker=selected_worker,
-            bhatta=selected_bhatta,
-            week_start__year=year
-        ).aggregate(sum=Sum('bricks_worked'))['sum'] or 0
+            worker_id=worker_id,
+            bhatta_id=bhatta_id
+        ).aggregate(total=Sum('bricks_worked'))['total'] or 0
 
         # Remaining advances
         total_advance_paid = AdvanceDeduction.objects.filter(
             advance__worker=selected_worker
         ).aggregate(sum=Sum('deducted_amount'))['sum'] or Decimal('0')
 
-        total_advance_all = Advance.objects.filter(worker=selected_worker).aggregate(sum=Sum('amount'))['sum'] or Decimal('0')
+        total_advance_all = Advance.objects.filter(
+            worker=selected_worker
+        ).aggregate(sum=Sum('amount'))['sum'] or Decimal('0')
+
         total_advance = total_advance_all - total_advance_paid
 
         # Remaining loans
@@ -92,9 +97,15 @@ def yearly_settlement_create(request, worker_id=None, bhatta_id=None):
             loan__worker=selected_worker
         ).aggregate(sum=Sum('deducted_amount'))['sum'] or Decimal('0')
 
-        total_loan_all = Loan.objects.filter(worker=selected_worker).aggregate(sum=Sum('amount'))['sum'] or Decimal('0')
+        total_loan_all = Loan.objects.filter(
+            worker=selected_worker
+        ).aggregate(sum=Sum('amount'))['sum'] or Decimal('0')
+
         total_loan = total_loan_all - total_loan_paid
 
+    # =========================
+    # POST LOGIC
+    # =========================
     if request.method == 'POST':
         worker_id = request.POST.get('worker')
         bhatta_id = request.POST.get('bhatta')
@@ -104,19 +115,21 @@ def yearly_settlement_create(request, worker_id=None, bhatta_id=None):
         worker = get_object_or_404(Worker, id=worker_id)
         bhatta = get_object_or_404(Bhatta, id=bhatta_id)
 
-        # Total bricks
+        # ✅ TOTAL BRICKS (ALL RECORDS - NO DATE FILTER)
         total_bricks = WeeklyReport.objects.filter(
-            worker=worker,
-            bhatta=bhatta,
-            week_start__year=year
-        ).aggregate(sum=Sum('bricks_worked'))['sum'] or 0
+            worker_id=worker_id,
+            bhatta_id=bhatta_id
+        ).aggregate(total=Sum('bricks_worked'))['total'] or 0
 
         # ----- ADVANCE REMAINING -----
         total_advance_paid = AdvanceDeduction.objects.filter(
             advance__worker=worker
         ).aggregate(sum=Sum('deducted_amount'))['sum'] or Decimal('0')
 
-        total_advance_all = Advance.objects.filter(worker=worker).aggregate(sum=Sum('amount'))['sum'] or Decimal('0')
+        total_advance_all = Advance.objects.filter(
+            worker=worker
+        ).aggregate(sum=Sum('amount'))['sum'] or Decimal('0')
+
         total_advance = total_advance_all - total_advance_paid
 
         # ----- LOAN REMAINING -----
@@ -124,24 +137,19 @@ def yearly_settlement_create(request, worker_id=None, bhatta_id=None):
             loan__worker=worker
         ).aggregate(sum=Sum('deducted_amount'))['sum'] or Decimal('0')
 
-        total_loan_all = Loan.objects.filter(worker=worker).aggregate(sum=Sum('amount'))['sum'] or Decimal('0')
+        total_loan_all = Loan.objects.filter(
+            worker=worker
+        ).aggregate(sum=Sum('amount'))['sum'] or Decimal('0')
 
         # USER INPUT LOAN DEDUCTION
-        user_loan_input = request.POST.get('total_loan_deducted')
-        user_loan_input = Decimal(user_loan_input or 0)
+        user_loan_input = Decimal(request.POST.get('total_loan_deducted') or 0)
 
-        # Remaining loan available
         remaining_loan = total_loan_all - total_loan_paid
-
-        # Deduct only the amount user entered, capped at remaining
         total_loan = min(user_loan_input, remaining_loan)
 
-        # Total earned
+        # ----- CALCULATIONS -----
         total_earned = Decimal(total_bricks) / Decimal('1000') * brick_rate
-
-        # Net payable
         amount_to_pay = total_earned - total_advance - total_loan
-
         payment_made = Decimal(request.POST.get('payment_made') or 0)
 
         # ----- CREATE SETTLEMENT -----
@@ -158,14 +166,13 @@ def yearly_settlement_create(request, worker_id=None, bhatta_id=None):
             payment_made=payment_made,
         )
 
-        # If negative (worker owes), convert to new advance
+        # If negative → convert to new advance
         if amount_to_pay < 0:
             Advance.objects.create(
                 worker=worker,
                 amount=abs(amount_to_pay),
                 date=timezone.now()
             )
-            amount_to_pay = 0
 
         # ----- APPLY ADVANCE DEDUCTIONS -----
         remaining_adv_deduction = total_advance
@@ -174,17 +181,23 @@ def yearly_settlement_create(request, worker_id=None, bhatta_id=None):
         for adv in advances:
             if remaining_adv_deduction <= 0:
                 break
-            already_deducted = adv.deductions.aggregate(total=Sum('deducted_amount'))['total'] or 0
+
+            already_deducted = adv.deductions.aggregate(
+                total=Sum('deducted_amount')
+            )['total'] or 0
+
             available = adv.amount - already_deducted
             if available <= 0:
                 continue
 
             deduction = min(available, remaining_adv_deduction)
+
             AdvanceDeduction.objects.create(
                 advance=adv,
                 settlement=settlement,
                 deducted_amount=deduction
             )
+
             remaining_adv_deduction -= deduction
 
         # ----- APPLY LOAN DEDUCTIONS -----
@@ -194,17 +207,23 @@ def yearly_settlement_create(request, worker_id=None, bhatta_id=None):
         for loan in loans:
             if remaining_loan_deduction <= 0:
                 break
-            already_deducted = loan.deductions.aggregate(total=Sum('deducted_amount'))['total'] or 0
+
+            already_deducted = loan.deductions.aggregate(
+                total=Sum('deducted_amount')
+            )['total'] or 0
+
             available = loan.amount - already_deducted
             if available <= 0:
                 continue
 
             deduction = min(available, remaining_loan_deduction)
+
             LoanDeduction.objects.create(
                 loan=loan,
                 settlement=settlement,
                 deducted_amount=deduction
             )
+
             remaining_loan_deduction -= deduction
 
         return redirect('worker:detail', worker.id)
